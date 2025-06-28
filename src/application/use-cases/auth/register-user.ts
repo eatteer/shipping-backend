@@ -1,5 +1,6 @@
 import { PasswordService } from "@application/services/password-service";
 import { User } from "@domain/entities/user";
+import { UserAlreadyExists } from "@domain/errors/user-already-exists-error";
 import { UserRepository } from "@domain/repositories/user-repository";
 
 export interface RegisterUserRequest {
@@ -24,7 +25,7 @@ export class RegisterUser {
     const existingUser = await this.userRepository.findByEmail(request.email);
 
     if (existingUser) {
-      throw new Error("User with this email already exists.");
+      throw new UserAlreadyExists();
     }
 
     const passwordHash = await this.passwordService.hashPassword(

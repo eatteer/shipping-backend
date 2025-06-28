@@ -1,4 +1,5 @@
 import { QuoteShipment } from "@application/use-cases/quotes/quote-shipment";
+import { NotFoundError } from "@domain/errors/not-found-error";
 import { QUOTE_SHIPMENT_BODY_SCHEMA } from "@infrastructure/web/schemas/shipment-schemas";
 import { Static } from "@sinclair/typebox";
 import { FastifyReply, FastifyRequest } from "fastify";
@@ -32,9 +33,9 @@ export class ShipmentController {
       });
 
       reply.code(201).send(response);
-    } catch (error: any) {
-      if (error.message === "User with this email already exists.") {
-        reply.code(409).send({ message: error.message });
+    } catch (error: unknown) {
+      if (error instanceof NotFoundError) {
+        reply.code(409).send({ message: error.message, error: error.error });
       } else {
         request.log.error(error);
 

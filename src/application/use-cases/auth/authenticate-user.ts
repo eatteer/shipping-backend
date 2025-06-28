@@ -1,5 +1,6 @@
 import { PasswordService } from "@application/services/password-service";
 import { TokenService } from "@application/services/token-service";
+import { AuthenticationError } from "@domain/errors/authentication-error";
 import { UserRepository } from "@domain/repositories/user-repository";
 
 export interface AuthenticateUserRequest {
@@ -24,7 +25,7 @@ export class AuthenticateUser {
     const user = await this.userRepository.findByEmail(request.email);
 
     if (!user) {
-      throw new Error("Invalid credentials.");
+      throw new AuthenticationError();
     }
 
     const isPasswordValid = await this.passwordService.comparePassword(
@@ -33,7 +34,7 @@ export class AuthenticateUser {
     );
 
     if (!isPasswordValid) {
-      throw new Error("User does not exist or invalid credentials.");
+      throw new AuthenticationError();
     }
 
     const token = await this.tokenService.generateToken({

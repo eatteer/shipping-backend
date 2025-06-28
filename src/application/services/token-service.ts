@@ -1,3 +1,5 @@
+import { InvalidTokenError } from "@domain/errors/invalid-token-error";
+import { TokenExpiredError } from "@domain/errors/token-expired-error";
 import { FastifyInstance } from "fastify";
 
 export interface TokenPayload {
@@ -26,13 +28,13 @@ export class FastifyJwtTokenService implements TokenService {
       const decoded = (await this.fastify.jwt.verify(token)) as TokenPayload;
 
       return decoded;
-    } catch (error: any) {
-      if (error.name === "TokenExpiredError") {
-        throw new Error("Token expired.");
+    } catch (error: unknown) {
+      if (error instanceof Error && error.name === "TokenExpiredError") {
+        throw new TokenExpiredError();
       }
 
-      if (error.name === "JsonWebTokenError") {
-        throw new Error("Invalid token.");
+      if (error instanceof Error && error.name === "JsonWebTokenError") {
+        throw new InvalidTokenError();
       }
 
       throw error;

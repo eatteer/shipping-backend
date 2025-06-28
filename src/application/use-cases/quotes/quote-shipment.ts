@@ -1,3 +1,5 @@
+import { NotFoundError } from "@domain/errors/not-found-error";
+import { SameOriginDestinationCityError } from "@domain/errors/same-origin-destination-city-error";
 import { CityRepository } from "@domain/repositories/city-repository";
 import { RateRepository } from "@domain/repositories/rate-repository";
 
@@ -47,21 +49,15 @@ export class QuoteShipment {
     );
 
     if (!originCity) {
-      throw new Error(
-        `Ciudad de origen con ID '${originCityId}' no encontrada.`
-      );
+      throw new NotFoundError().setEntityName("Origin city");
     }
 
     if (!destinationCity) {
-      throw new Error(
-        `Ciudad de destino con ID '${destinationCityId}' no encontrada.`
-      );
+      throw new NotFoundError().setEntityName("Destination city");
     }
 
     if (originCity.id === destinationCity.id) {
-      throw new Error(
-        "La ciudad de origen y la ciudad de destino no pueden ser la misma."
-      );
+      throw new SameOriginDestinationCityError();
     }
 
     const originZoneId = originCity.zoneId;
@@ -73,9 +69,7 @@ export class QuoteShipment {
     );
 
     if (!rate) {
-      throw new Error(
-        `No se encontró una tarifa para la ruta de zona ${originZoneId} a zona ${destinationZoneId}.`
-      );
+      throw new NotFoundError().setEntityName("Rate");
     }
 
     const volumetricWeightCm3 =

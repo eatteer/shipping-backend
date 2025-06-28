@@ -23,8 +23,14 @@ export async function authRoutes(
         body: REGISTER_BODY_SCHEMA,
         response: {
           201: REGISTER_RESPONSE_SCHEMA,
-          409: Type.Object({ message: Type.String() }),
-          500: Type.Object({ message: Type.String() }),
+          409: Type.Object({
+            message: Type.String(),
+            error: Type.Optional(Type.String()),
+          }),
+          500: Type.Object({
+            message: Type.String(),
+            error: Type.Optional(Type.String()),
+          }),
         },
       },
     },
@@ -38,8 +44,14 @@ export async function authRoutes(
         body: AUTH_BODY_SCHEMA,
         response: {
           200: AUTH_RESPONSE_SCHEMA,
-          401: Type.Object({ message: Type.String() }),
-          500: Type.Object({ message: Type.String() }),
+          401: Type.Object({
+            message: Type.String(),
+            error: Type.Optional(Type.String()),
+          }),
+          500: Type.Object({
+            message: Type.String(),
+            error: Type.Optional(Type.String()),
+          }),
         },
       },
     },

@@ -21,8 +21,14 @@ export async function shipmentRoutes(
         body: QUOTE_SHIPMENT_BODY_SCHEMA,
         response: {
           201: QUOTE_SHIPMENT_RESPONSE_SCHEMA,
-          409: Type.Object({ message: Type.String() }),
-          500: Type.Object({ message: Type.String() }),
+          409: Type.Object({
+            message: Type.String(),
+            error: Type.Optional(Type.String()),
+          }),
+          500: Type.Object({
+            message: Type.String(),
+            error: Type.Optional(Type.String()),
+          }),
         },
       },
     },
