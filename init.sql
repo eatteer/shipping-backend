@@ -81,7 +81,7 @@ CREATE TABLE IF NOT EXISTS shipments (
     package_height_cm NUMERIC(10, 2) NOT NULL,
     calculated_weight_kg NUMERIC(10, 2) NOT NULL,
     quoted_value NUMERIC(10, 2) NOT NULL,
-    current_status_id UUID NOT NULL,
+    current_status_id UUID NOT NULL DEFAULT '1a2b3c4d-e5f6-7890-1234-567890abcdef',
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_user

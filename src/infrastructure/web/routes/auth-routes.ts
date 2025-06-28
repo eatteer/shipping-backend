@@ -1,11 +1,9 @@
 import { FastifyInstance } from "fastify";
-import { Static, Type } from "@sinclair/typebox";
+import { Static } from "@sinclair/typebox";
 import { AuthController } from "@infrastructure/web/controllers/auth-controller";
 import {
   AUTH_BODY_SCHEMA,
-  AUTH_RESPONSE_SCHEMA,
   REGISTER_BODY_SCHEMA,
-  REGISTER_RESPONSE_SCHEMA,
 } from "@infrastructure/web/schemas/auth-schemas";
 
 interface AuthRoutesDependencies {
@@ -21,17 +19,6 @@ export async function authRoutes(
     {
       schema: {
         body: REGISTER_BODY_SCHEMA,
-        response: {
-          201: REGISTER_RESPONSE_SCHEMA,
-          409: Type.Object({
-            message: Type.String(),
-            code: Type.Optional(Type.String()),
-          }),
-          500: Type.Object({
-            message: Type.String(),
-            code: Type.Optional(Type.String()),
-          }),
-        },
       },
     },
     authController.register.bind(authController)
@@ -42,17 +29,6 @@ export async function authRoutes(
     {
       schema: {
         body: AUTH_BODY_SCHEMA,
-        response: {
-          200: AUTH_RESPONSE_SCHEMA,
-          401: Type.Object({
-            message: Type.String(),
-            code: Type.Optional(Type.String()),
-          }),
-          500: Type.Object({
-            message: Type.String(),
-            code: Type.Optional(Type.String()),
-          }),
-        },
       },
     },
     authController.authenticate.bind(authController)

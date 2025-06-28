@@ -8,20 +8,13 @@ export interface RegisterUserRequest {
   password: string;
 }
 
-export interface RegisterUserResponse {
-  email: string;
-  createdAt: Date;
-}
-
 export class RegisterUser {
   public constructor(
     private readonly userRepository: UserRepository,
     private readonly passwordService: PasswordService
   ) {}
 
-  public async execute(
-    request: RegisterUserRequest
-  ): Promise<RegisterUserResponse> {
+  public async execute(request: RegisterUserRequest) {
     const existingUser = await this.userRepository.findByEmail(request.email);
 
     if (existingUser) {
@@ -38,10 +31,5 @@ export class RegisterUser {
     });
 
     await this.userRepository.save(newUser);
-
-    return {
-      email: newUser.email,
-      createdAt: newUser.createdAt,
-    };
   }
 }

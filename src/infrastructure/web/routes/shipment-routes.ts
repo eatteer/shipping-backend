@@ -1,9 +1,9 @@
 import { ShipmentController } from "@infrastructure/web/controllers/shipment-controller";
 import {
+  CREATE_SHIPMENT_BODY_SCHEMA,
   QUOTE_SHIPMENT_BODY_SCHEMA,
-  QUOTE_SHIPMENT_RESPONSE_SCHEMA,
 } from "@infrastructure/web/schemas/shipment-schemas";
-import { Static, Type } from "@sinclair/typebox";
+import { Static } from "@sinclair/typebox";
 import { FastifyInstance } from "fastify";
 
 interface ShipmentRoutesDependencies {
@@ -19,21 +19,22 @@ export async function shipmentRoutes(
     {
       schema: {
         body: QUOTE_SHIPMENT_BODY_SCHEMA,
-        response: {
-          201: QUOTE_SHIPMENT_RESPONSE_SCHEMA,
-          409: Type.Object({
-            message: Type.String(),
-            code: Type.Optional(Type.String()),
-          }),
-          500: Type.Object({
-            message: Type.String(),
-            code: Type.Optional(Type.String()),
-          }),
-        },
       },
       // @ts-expect-error
       onRequest: [fastify.authenticate],
     },
     shipmentController.quote.bind(shipmentController)
+  );
+
+  fastify.post(
+    "/",
+    {
+      schema: {
+        body: CREATE_SHIPMENT_BODY_SCHEMA,
+      },
+      // @ts-expect-error
+      onRequest: [fastify.authenticate],
+    },
+    shipmentController.create.bind(shipmentController)
   );
 }

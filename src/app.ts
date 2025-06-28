@@ -1,11 +1,7 @@
 import "dotenv/config";
 
 import { asClass, asFunction, createContainer, InjectionMode } from "awilix";
-import Fastify, {
-  FastifyInstance,
-  FastifyReply,
-  FastifyRequest,
-} from "fastify";
+import Fastify, { FastifyReply, FastifyRequest } from "fastify";
 
 // Fastify plugins
 import { FastifyAwilixOptions, fastifyAwilixPlugin } from "@fastify/awilix";
@@ -35,39 +31,13 @@ import { PostgresRateRepository } from "@infrastructure/database/postgres-rate-r
 import { ShipmentController } from "@infrastructure/web/controllers/shipment-controller";
 import { authRoutes } from "@infrastructure/web/routes/auth-routes";
 import { shipmentRoutes } from "@infrastructure/web/routes/shipment-routes";
+import { PostgresShipmentRepository } from "@infrastructure/database/postgres-shipment-repository";
+import { CreateShipment } from "@application/use-cases/shipments/create-shipment";
+import { CONFIG_SCHEMA, getEnv } from "src/config";
 
 // Configuration schema for environment plugin
-const CONFIG_SCHEMA = {
-  type: "object",
-  required: [
-    "PORT",
-    "DB_HOST",
-    "DB_PORT",
-    "DB_USER",
-    "DB_PASSWORD",
-    "DB_NAME",
-    "JWT_SECRET",
-    "JWT_EXPIRES_IN",
-  ],
-  properties: {
-    PORT: { type: "number", default: 3000 },
-    DB_HOST: { type: "string" },
-    DB_PORT: { type: "number" },
-    DB_USER: { type: "string" },
-    DB_PASSWORD: { type: "string" },
-    DB_NAME: { type: "string" },
-    JWT_SECRET: { type: "string" },
-    JWT_EXPIRES_IN: { type: "string" },
-  },
-};
-
-function getEnv(fastify: FastifyInstance): Record<string, any> {
-  // @ts-expect-error
-  return fastify.config;
-}
-
 export async function buildApp() {
-  const fastify: FastifyInstance = Fastify({
+  const fastify = Fastify({
     logger: true,
   }).withTypeProvider<TypeBoxTypeProvider>();
 
@@ -115,6 +85,9 @@ export async function buildApp() {
     rateRepository: asFunction(
       () => new PostgresRateRepository(fastify.pg)
     ).singleton(),
+    shipmentRepository: asFunction(
+      () => new PostgresShipmentRepository(fastify.pg)
+    ).singleton(),
 
     // Services
     passwordService: asClass(BcryptPasswordService).singleton(),
@@ -126,6 +99,7 @@ export async function buildApp() {
     registerUser: asClass(RegisterUser).singleton(),
     authenticateUser: asClass(AuthenticateUser).singleton(),
     quoteShipment: asClass(QuoteShipment).singleton(),
+    createShipment: asClass(CreateShipment).singleton(),
 
     // Controllers
     authController: asClass(AuthController).singleton(),
