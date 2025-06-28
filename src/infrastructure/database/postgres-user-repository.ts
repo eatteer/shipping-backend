@@ -1,0 +1,82 @@
+import { PoolClient } from "pg";
+import { PostgresDb } from "@fastify/postgres";
+import { UserRepository } from "@domain/repositories/user-repository";
+import { User } from "@domain/entities/user";
+
+export class PostgresUserRepository implements UserRepository {
+  private readonly pg: PostgresDb;
+
+  public constructor(pg: PostgresDb) {
+    this.pg = pg;
+  }
+
+  private mapRowToUser(row: any): User {
+    return new User({
+      id: row.id,
+      email: row.email,
+      passwordHash: row.password_hash,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+    });
+  }
+
+  public async findById(id: string): Promise<User | null> {
+    const result = await this.pg.query("SELECT * FROM users WHERE id = $1", [
+      id,
+    ]);
+
+    return result.rows.length ? this.mapRowToUser(result.rows[0]) : null;
+  }
+
+  public async findByEmail(email: string): Promise<User | null> {
+    const result = await this.pg.query("SELECT * FROM users WHERE email = $1", [
+      email,
+    ]);
+
+    return result.rows.length ? this.mapRowToUser(result.rows[0]) : null;
+  }
+
+  public async save(user: User): Promise<void> {
+    // To ensure a proper transaction, it's better to acquire a client explicitly
+    // when performing multiple operations or when strict transactional integrity is needed.
+    // For a single INSERT/UPDATE like this, `this.pg.query` is fine, but for full ACID,
+    // explicitly getting a client is more robust. Let's do that to be safer.
+
+    let client: PoolClient | null = null;
+
+    try {
+      client = await this.pg.connect(); // Acquire a client from the pool
+
+      await client.query("BEGIN"); // Start transaction
+
+      const query = `
+        INSERT INTO users (id, email, password_hash, created_at, updated_at)
+        VALUES ($1, $2, $3, $4, $5)
+        ON CONFLICT (id) DO UPDATE SET
+          email = EXCLUDED.email,
+          password_hash = EXCLUDED.password_hash,
+          updated_at = EXCLUDED.updated_at;
+      `;
+
+      await client.query(query, [
+        user.id,
+        user.email,
+        user.passwordHash,
+        user.createdAt,
+        user.updatedAt,
+      ]);
+
+      await client.query("COMMIT"); // Commit transaction
+    } catch (error) {
+      if (client) {
+        await client.query("ROLLBACK"); // Rollback on error
+      }
+
+      throw error;
+    } finally {
+      if (client) {
+        client.release(); // Release the client back to the pool
+      }
+    }
+  }
+}

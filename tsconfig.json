@@ -12,8 +12,27 @@
     "resolveJsonModule": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "allowJs": true
+    "allowJs": true,
+    "baseUrl": "./src", // Indicar la base para la resolución de módulos no relativos
+    "paths": {
+      "@domain/*": ["domain/*"],
+      "@application/*": ["application/*"],
+      "@infrastructure/*": ["infrastructure/*"],
+      "@config/*": ["config/*"] // O cualquier otra carpeta raíz que quieras aliasar
+    },
+    "types": [
+      "node",
+      "fastify", // Añadir 'fastify' explícitamente
+      "@fastify/env",
+      "@fastify/jwt",
+      "@fastify/postgres",
+      "@fastify/awilix" // Asegúrate de que todos los tipos de plugins importantes estén aquí
+    ]
   },
-  "include": ["src/**/*.ts", "tests/**/*.ts"],
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.d.ts", // Asegura que todos los archivos .d.ts en src sean incluidos
+    "tests/**/*.ts"
+  ],
   "exclude": ["node_modules"]
 }
