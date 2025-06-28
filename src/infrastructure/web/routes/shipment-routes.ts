@@ -23,14 +23,16 @@ export async function shipmentRoutes(
           201: QUOTE_SHIPMENT_RESPONSE_SCHEMA,
           409: Type.Object({
             message: Type.String(),
-            error: Type.Optional(Type.String()),
+            code: Type.Optional(Type.String()),
           }),
           500: Type.Object({
             message: Type.String(),
-            error: Type.Optional(Type.String()),
+            code: Type.Optional(Type.String()),
           }),
         },
       },
+      // @ts-expect-error
+      onRequest: [fastify.authenticate],
     },
     shipmentController.quote.bind(shipmentController)
   );

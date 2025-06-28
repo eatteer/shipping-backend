@@ -35,13 +35,13 @@ export class AuthController {
       if (error instanceof AuthenticationError) {
         return reply
           .code(400)
-          .send({ message: error.message, error: error.error });
+          .send({ message: error.message, code: error.code });
       }
 
       if (error instanceof UserAlreadyExists) {
         return reply
           .code(409)
-          .send({ message: error.message, error: error.error });
+          .send({ message: error.message, code: error.code });
       }
 
       request.log.error(error);
@@ -65,7 +65,7 @@ export class AuthController {
       reply.code(200).send(response);
     } catch (error: unknown) {
       if (error instanceof AuthenticationError) {
-        reply.code(401).send({ message: error.message, error: error.error });
+        reply.code(401).send({ message: error.message, code: error.code });
       }
 
       request.log.error(error);

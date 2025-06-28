@@ -35,7 +35,7 @@ export class ShipmentController {
       reply.code(201).send(response);
     } catch (error: unknown) {
       if (error instanceof NotFoundError) {
-        reply.code(409).send({ message: error.message, error: error.error });
+        reply.code(409).send({ message: error.message, code: error.code });
       } else {
         request.log.error(error);
 

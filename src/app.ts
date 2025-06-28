@@ -1,7 +1,11 @@
 import "dotenv/config";
 
 import { asClass, asFunction, createContainer, InjectionMode } from "awilix";
-import Fastify, { FastifyInstance } from "fastify";
+import Fastify, {
+  FastifyInstance,
+  FastifyReply,
+  FastifyRequest,
+} from "fastify";
 
 // Fastify plugins
 import { FastifyAwilixOptions, fastifyAwilixPlugin } from "@fastify/awilix";
@@ -153,13 +157,16 @@ export async function buildApp() {
   );
 
   // Configure hooks
-  fastify.decorate("authenticate", async (request: any, reply: any) => {
-    try {
-      await request.jwtVerify();
-    } catch (err) {
-      reply.send(err);
+  fastify.decorate(
+    "authenticate",
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      try {
+        await request.jwtVerify();
+      } catch (err) {
+        reply.send(err);
+      }
     }
-  });
+  );
 
   return fastify;
 }

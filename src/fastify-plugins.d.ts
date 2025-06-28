@@ -17,7 +17,11 @@ declare module "fastify" {
     // };
 
     jwt: FastifyJWTOptions["jwt"];
-
     pg: FastifyPostgres;
+
+    // authenticate: (
+    //   request: FastifyRequest,
+    //   reply: FastifyReply
+    // ) => Promise<void>;
   }
 }

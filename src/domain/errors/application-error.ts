@@ -1,15 +1,15 @@
 export class ApplicationError extends Error {
   public name: string;
-  public error: string;
+  public code: string;
 
   public constructor(
     message: string,
-    error: string,
+    code: string,
     name: string = "ApplicationError"
   ) {
     super(message);
     this.name = name;
-    this.error = error;
+    this.code = code;
     Object.setPrototypeOf(this, new.target.prototype);
   }
 
@@ -18,8 +18,8 @@ export class ApplicationError extends Error {
     return this;
   }
 
-  public setError(error: string): this {
-    this.error = error;
+  public setCode(error: string): this {
+    this.code = error;
     return this;
   }
 
