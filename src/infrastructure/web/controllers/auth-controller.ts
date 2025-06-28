@@ -25,7 +25,7 @@ export class AuthController {
 
       const response = await this.registerUser.execute({
         email,
-        passwordPlainText: password,
+        password,
       });
 
       reply.code(201).send(response);

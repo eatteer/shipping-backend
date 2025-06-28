@@ -3,7 +3,7 @@ import "dotenv/config";
 import { asClass, asFunction, createContainer, InjectionMode } from "awilix";
 import Fastify, { FastifyInstance } from "fastify";
 
-// Fastify Plugins
+// Fastify plugins
 import { FastifyAwilixOptions, fastifyAwilixPlugin } from "@fastify/awilix";
 import fastifyEnvPlugin from "@fastify/env";
 import fastifyJwtPlugin from "@fastify/jwt";
@@ -25,10 +25,15 @@ import { FastifyJwtTokenService } from "@application/services/token-service";
 import { AuthController } from "@infrastructure/web/controllers/auth-controller";
 
 // Routes
+import { QuoteShipment } from "@application/use-cases/quotes/quote-shipment";
+import { PostgresCityRepository } from "@infrastructure/database/postgres-city-repository";
+import { PostgresRateRepository } from "@infrastructure/database/postgres-rate-repository";
+import { ShipmentController } from "@infrastructure/web/controllers/shipment-controller";
 import { authRoutes } from "@infrastructure/web/routes/auth-routes";
+import { shipmentRoutes } from "@infrastructure/web/routes/shipment-routes";
 
 // Configuration schema for environment plugin
-const configSchema = {
+const CONFIG_SCHEMA = {
   type: "object",
   required: [
     "PORT",
@@ -65,7 +70,7 @@ export async function buildApp() {
   // Register environment plugin
   await fastify.register(fastifyEnvPlugin, {
     confKey: "config",
-    schema: configSchema,
+    schema: CONFIG_SCHEMA,
     dotenv: true, // Enable dotenv through fastify-env
     data: process.env,
   });
@@ -100,6 +105,12 @@ export async function buildApp() {
     userRepository: asFunction(
       () => new PostgresUserRepository(fastify.pg)
     ).singleton(),
+    cityRepository: asFunction(
+      () => new PostgresCityRepository(fastify.pg)
+    ).singleton(),
+    rateRepository: asFunction(
+      () => new PostgresRateRepository(fastify.pg)
+    ).singleton(),
 
     // Services
     passwordService: asClass(BcryptPasswordService).singleton(),
@@ -110,9 +121,11 @@ export async function buildApp() {
     // Use cases
     registerUser: asClass(RegisterUser).singleton(),
     authenticateUser: asClass(AuthenticateUser).singleton(),
+    quoteShipment: asClass(QuoteShipment).singleton(),
 
     // Controllers
     authController: asClass(AuthController).singleton(),
+    shipmentController: asClass(ShipmentController).singleton(),
   });
 
   // Register Awilix plugin
@@ -128,6 +141,15 @@ export async function buildApp() {
       await authRoutes(instance, { authController });
     },
     { prefix: "/auth" }
+  );
+
+  fastify.register(
+    async (instance) => {
+      const shipmentController =
+        instance.diContainer.resolve<ShipmentController>("shipmentController");
+      await shipmentRoutes(instance, { shipmentController });
+    },
+    { prefix: "/shipments" }
   );
 
   // Configure hooks

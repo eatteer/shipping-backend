@@ -4,11 +4,10 @@ import { UserRepository } from "@domain/repositories/user-repository";
 
 export interface RegisterUserRequest {
   email: string;
-  passwordPlainText: string;
+  password: string;
 }
 
 export interface RegisterUserResponse {
-  userId: string;
   email: string;
   createdAt: Date;
 }
@@ -29,7 +28,7 @@ export class RegisterUser {
     }
 
     const passwordHash = await this.passwordService.hashPassword(
-      request.passwordPlainText
+      request.password
     );
 
     const newUser = new User({
@@ -40,7 +39,6 @@ export class RegisterUser {
     await this.userRepository.save(newUser);
 
     return {
-      userId: newUser.id,
       email: newUser.email,
       createdAt: newUser.createdAt,
     };

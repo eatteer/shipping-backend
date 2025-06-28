@@ -52,11 +52,11 @@ CREATE TABLE IF NOT EXISTS rates (
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_origin_zone_rate
         FOREIGN KEY(origin_zone_id)
-        REFERENCES zones(id),
+        REFERENCES zones(id)
         ON DELETE RESTRICT,
     CONSTRAINT fk_destination_zone_rate
         FOREIGN KEY(destination_zone_id)
-        REFERENCES zones(id),
+        REFERENCES zones(id)
         ON DELETE RESTRICT,
     UNIQUE(origin_zone_id, destination_zone_id) -- Zone combination is unique
 );
@@ -123,16 +123,16 @@ INSERT INTO zones (id, name, description) VALUES
 ('c5d6e7f8-a9b0-1234-5678-90abcdef1234', 'Zona Antioquia', 'Principales ciudades de Antioquia')
 ON CONFLICT (id) DO NOTHING;
 
-INSERT INTO departments (id, name, code) VALUES
-('1e9e8d7c-6b5a-4f3e-2d1c-0b9a8e7d6c5b', 'Cundinamarca', '25'),
-('2f0f1e2d-3c4b-5a69-7889-9a0b1c2d3e4f', 'Risaralda', '66'),
-('3a4b5c6d-7e8f-9012-3456-7890abcdef01', 'Antioquia', '05')
+INSERT INTO departments (id, name) VALUES
+('1e9e8d7c-6b5a-4f3e-2d1c-0b9a8e7d6c5b', 'Cundinamarca'),
+('2f0f1e2d-3c4b-5a69-7889-9a0b1c2d3e4f', 'Risaralda'),
+('3a4b5c6d-7e8f-9012-3456-7890abcdef01', 'Antioquia')
 ON CONFLICT (id) DO NOTHING;
 
-INSERT INTO cities (id, name, department_id, zone_id, is_capital) VALUES
-('4b5c6d7e-8f90-1234-5678-90abcdef0123', 'Bogota', '1e9e8d7c-6b5a-4f3e-2d1c-0b9a8e7d6c5b', 'b3c2a1d0-e4f5-4678-9a0b-1c2d3e4f5a6b', TRUE),
-('5a6b7c8d-9e0f-1234-5678-90abcdef1234', 'Pereira', '2f0f1e2d-3c4b-5a69-7889-9a0b1c2d3e4f', 'a1b2c3d4-e5f6-7890-1234-567890abcdef', TRUE),
-('6c7d8e9f-0a1b-2345-6789-0abcdef12345', 'Medellin', '3a4b5c6d-7e8f-9012-3456-7890abcdef01', 'c5d6e7f8-a9b0-1234-5678-90abcdef1234', TRUE)
+INSERT INTO cities (id, name, department_id, zone_id) VALUES
+('4b5c6d7e-8f90-1234-5678-90abcdef0123', 'Bogota', '1e9e8d7c-6b5a-4f3e-2d1c-0b9a8e7d6c5b', 'b3c2a1d0-e4f5-4678-9a0b-1c2d3e4f5a6b'),
+('5a6b7c8d-9e0f-1234-5678-90abcdef1234', 'Pereira', '2f0f1e2d-3c4b-5a69-7889-9a0b1c2d3e4f', 'a1b2c3d4-e5f6-7890-1234-567890abcdef'),
+('6c7d8e9f-0a1b-2345-6789-0abcdef12345', 'Medellin', '3a4b5c6d-7e8f-9012-3456-7890abcdef01', 'c5d6e7f8-a9b0-1234-5678-90abcdef1234')
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO rates (origin_zone_id, destination_zone_id, price_per_kg) VALUES

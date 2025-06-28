@@ -1,7 +1,7 @@
-import { PoolClient } from "pg";
-import { PostgresDb } from "@fastify/postgres";
-import { UserRepository } from "@domain/repositories/user-repository";
 import { User } from "@domain/entities/user";
+import { UserRepository } from "@domain/repositories/user-repository";
+import { PostgresDb } from "@fastify/postgres";
+import { PoolClient } from "pg";
 
 export class PostgresUserRepository implements UserRepository {
   private readonly pg: PostgresDb;

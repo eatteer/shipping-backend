@@ -8,8 +8,6 @@ export interface AuthenticateUserRequest {
 }
 
 export interface AuthenticateUserResponse {
-  userId: string;
-  email: string;
   token: string;
 }
 
@@ -44,8 +42,6 @@ export class AuthenticateUser {
     });
 
     return {
-      userId: user.id,
-      email: user.email,
       token: token,
     };
   }
