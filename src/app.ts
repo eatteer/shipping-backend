@@ -12,7 +12,9 @@ import Fastify, { FastifyReply, FastifyRequest } from "fastify";
 import { PostgresCityRepository } from "@infrastructure/database/postgres-city-repository";
 import { PostgresRateRepository } from "@infrastructure/database/postgres-rate-repository";
 import { PostgresShipmentRepository } from "@infrastructure/database/postgres-shipment-repository";
+import { PostgresShipmentStatusHistoryRepository } from "@infrastructure/database/postgres-shipment-status-history-repository";
 import { PostgresUserRepository } from "@infrastructure/database/postgres-user-repository";
+import { PostgresShipmentStatusRepository } from "@infrastructure/database/postgres-shipment-status-repository";
 
 // Use cases
 import { AuthenticateUser } from "@application/use-cases/auth/authenticate-user";
@@ -34,6 +36,7 @@ import { shipmentRoutes } from "@infrastructure/web/routes/shipment-routes";
 
 // Config
 import { CONFIG_SCHEMA, getEnv } from "src/config";
+import { GetShipmentTrackingDetails } from "@application/use-cases/shipments/get-shipment-tracking-details";
 
 // Configuration schema for environment plugin
 export async function buildApp() {
@@ -88,6 +91,12 @@ export async function buildApp() {
     shipmentRepository: asFunction(
       () => new PostgresShipmentRepository(fastify.pg)
     ).singleton(),
+    shipmentStatusRepository: asFunction(
+      () => new PostgresShipmentStatusRepository(fastify.pg)
+    ).singleton(),
+    shipmentStatusHistoryRepository: asFunction(
+      () => new PostgresShipmentStatusHistoryRepository(fastify.pg)
+    ).singleton(),
 
     // Services
     passwordService: asClass(BcryptPasswordService).singleton(),
@@ -100,6 +109,7 @@ export async function buildApp() {
     authenticateUser: asClass(AuthenticateUser).singleton(),
     quoteShipment: asClass(QuoteShipment).singleton(),
     createShipment: asClass(CreateShipment).singleton(),
+    getShipmentTrackingDetails: asClass(GetShipmentTrackingDetails).singleton(),
 
     // Controllers
     authController: asClass(AuthController).singleton(),

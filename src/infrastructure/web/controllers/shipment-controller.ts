@@ -1,24 +1,23 @@
 import { QuoteShipment } from "@application/use-cases/quotes/quote-shipment";
 import { CreateShipment } from "@application/use-cases/shipments/create-shipment";
+import { GetShipmentTrackingDetails } from "@application/use-cases/shipments/get-shipment-tracking-details";
 import { ApplicationError } from "@domain/errors/application-error";
 import { NotFoundError } from "@domain/errors/not-found-error";
 import { SameOriginDestinationCityError } from "@domain/errors/same-origin-destination-city-error";
 import { ValidationError } from "@domain/errors/validation-error";
 import { UserPayload } from "@infrastructure/web/entities/user-payload";
 import {
-  CREATE_SHIPMENT_BODY_SCHEMA,
-  QUOTE_SHIPMENT_BODY_SCHEMA,
+  CreateShipmentBody,
+  GetShipmentTrackingParams,
+  QuoteShipmentBody,
 } from "@infrastructure/web/schemas/shipment-schemas";
-import { Static } from "@sinclair/typebox";
 import { FastifyReply, FastifyRequest } from "fastify";
-
-type QuoteShipmentBody = Static<typeof QUOTE_SHIPMENT_BODY_SCHEMA>;
-export type CreateShipmentBody = Static<typeof CREATE_SHIPMENT_BODY_SCHEMA>;
 
 export class ShipmentController {
   public constructor(
     private readonly quoteShipment: QuoteShipment,
-    private readonly createShipment: CreateShipment
+    private readonly createShipment: CreateShipment,
+    private readonly getShipmentTrackingDetails: GetShipmentTrackingDetails
   ) {}
 
   public async quote(
@@ -117,6 +116,34 @@ export class ShipmentController {
         message: "Internal server error",
         errorCode: "INTERNAL_SERVER_ERROR",
       });
+    }
+  }
+
+  public async getTrackingDetails(
+    request: FastifyRequest<{ Params: GetShipmentTrackingParams }>,
+    reply: FastifyReply
+  ) {
+    const userPayload = request.user as UserPayload;
+    const userId = userPayload.userId;
+
+    const { id: shipmentId } = request.params;
+
+    try {
+      const trackingDetails = await this.getShipmentTrackingDetails.execute({
+        shipmentId,
+        userId,
+      });
+
+      reply.status(200).send(trackingDetails);
+    } catch (error) {
+      if (error instanceof NotFoundError) {
+        reply.status(404).send({ message: error.message });
+      } else if (error instanceof ApplicationError) {
+        reply.status(400).send({ message: error.message, code: error.code });
+      } else {
+        request.log.error(error);
+        reply.status(500).send({ message: "An unexpected error occurred." });
+      }
     }
   }
 }

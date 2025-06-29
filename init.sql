@@ -147,3 +147,23 @@ INSERT INTO status_types (id, name, description, is_final) VALUES
 ('2b3c4d5e-f6a7-8901-2345-67890abcdef0', 'En tránsito', 'El envío está en ruta hacia su destino.', FALSE),
 ('3c4d5e6f-a7b8-9012-3456-7890abcdef12', 'Entregado', 'El envío ha sido exitosamente entregado al destinatario.', TRUE)
 ON CONFLICT (id) DO NOTHING;
+
+CREATE OR REPLACE FUNCTION log_shipment_status_change()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF OLD.current_status_id IS DISTINCT FROM NEW.current_status_id THEN
+
+        INSERT INTO shipment_status_history (shipment_id, status_id, timestamp)
+        VALUES (NEW.id, NEW.current_status_id, CURRENT_TIMESTAMP);
+
+        NEW.updated_at = CURRENT_TIMESTAMP;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_log_shipment_status_change
+AFTER UPDATE ON shipments
+FOR EACH ROW
+EXECUTE FUNCTION log_shipment_status_change();

@@ -10,10 +10,10 @@ declare module "fastify" {
     config: Config;
     jwt: FastifyJWTOptions["jwt"];
     pg: FastifyPostgres;
-    authenticate: (
-      request: FastifyRequest,
-      reply: FastifyReply
-    ) => Promise<void>;
+    // authenticate: (
+    //   request: FastifyRequest,
+    //   reply: FastifyReply
+    // ) => Promise<void>;
   }
 
   interface FastifyRequest {
