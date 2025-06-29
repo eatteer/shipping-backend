@@ -37,25 +37,16 @@ export class PostgresUserRepository implements UserRepository {
   }
 
   public async save(user: User): Promise<void> {
-    // To ensure a proper transaction, it's better to acquire a client explicitly
-    // when performing multiple operations or when strict transactional integrity is needed.
-    // For a single INSERT/UPDATE like this, `this.pg.query` is fine, but for full ACID,
-    // explicitly getting a client is more robust. Let's do that to be safer.
-
     let client: PoolClient | null = null;
 
     try {
-      client = await this.pg.connect(); // Acquire a client from the pool
+      client = await this.pg.connect();
 
-      await client.query("BEGIN"); // Start transaction
+      await client.query("BEGIN");
 
       const query = `
         INSERT INTO users (id, email, password_hash, created_at, updated_at)
-        VALUES ($1, $2, $3, $4, $5)
-        ON CONFLICT (id) DO UPDATE SET
-          email = EXCLUDED.email,
-          password_hash = EXCLUDED.password_hash,
-          updated_at = EXCLUDED.updated_at;
+        VALUES ($1, $2, $3, $4, $5);
       `;
 
       await client.query(query, [
@@ -66,16 +57,51 @@ export class PostgresUserRepository implements UserRepository {
         user.updatedAt,
       ]);
 
-      await client.query("COMMIT"); // Commit transaction
+      await client.query("COMMIT");
     } catch (error) {
       if (client) {
-        await client.query("ROLLBACK"); // Rollback on error
+        await client.query("ROLLBACK");
       }
 
       throw error;
     } finally {
       if (client) {
-        client.release(); // Release the client back to the pool
+        client.release();
+      }
+    }
+  }
+
+  public async update(user: User): Promise<void> {
+    let client: PoolClient | null = null;
+
+    try {
+      client = await this.pg.connect();
+
+      await client.query("BEGIN");
+
+      const query = `
+        UPDATE users
+        SET email = $1, password_hash = $2, updated_at = $3
+        WHERE id = $4;
+      `;
+
+      await client.query(query, [
+        user.email,
+        user.passwordHash,
+        user.updatedAt,
+        user.id,
+      ]);
+
+      await client.query("COMMIT");
+    } catch (error) {
+      if (client) {
+        await client.query("ROLLBACK");
+      }
+
+      throw error;
+    } finally {
+      if (client) {
+        client.release();
       }
     }
   }

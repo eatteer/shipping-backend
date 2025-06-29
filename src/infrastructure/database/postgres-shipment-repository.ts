@@ -1,4 +1,3 @@
-// src/infrastructure/database/postgres-shipment-repository.ts
 import { Shipment } from "@domain/entities/shipment";
 import { ShipmentRepository } from "@domain/repositories/shipment-repository";
 import { PostgresDb } from "@fastify/postgres";
@@ -23,7 +22,7 @@ export class PostgresShipmentRepository implements ShipmentRepository {
       packageHeightCm: parseFloat(row.package_height_cm),
       calculatedWeightKg: parseFloat(row.calculated_weight_kg),
       quotedValue: parseFloat(row.quoted_value),
-      currentStatusId: row.current_status_id, // Este seguirá mapeándose al leer
+      currentStatusId: row.current_status_id,
       createdAt: row.created_at,
       updatedAt: row.updated_at,
     });
@@ -57,7 +56,6 @@ export class PostgresShipmentRepository implements ShipmentRepository {
 
   public async save(shipment: Shipment): Promise<void> {
     let client: PoolClient | null = null;
-
     try {
       client = await this.pg.connect();
 
@@ -69,18 +67,7 @@ export class PostgresShipmentRepository implements ShipmentRepository {
           package_weight_kg, package_length_cm, package_width_cm, package_height_cm,
           calculated_weight_kg, quoted_value, created_at, updated_at
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
-        ON CONFLICT (id) DO UPDATE SET
-          user_id = EXCLUDED.user_id,
-          origin_city_id = EXCLUDED.origin_city_id,
-          destination_city_id = EXCLUDED.destination_city_id,
-          package_weight_kg = EXCLUDED.package_weight_kg,
-          package_length_cm = EXCLUDED.package_length_cm,
-          package_width_cm = EXCLUDED.package_width_cm,
-          package_height_cm = EXCLUDED.package_height_cm,
-          calculated_weight_kg = EXCLUDED.calculated_weight_kg,
-          quoted_value = EXCLUDED.quoted_value,
-          updated_at = EXCLUDED.updated_at;
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12);
       `;
 
       const values = [
@@ -99,7 +86,59 @@ export class PostgresShipmentRepository implements ShipmentRepository {
       ];
 
       await client.query(query, values);
+      await client.query("COMMIT");
+    } catch (error) {
+      if (client) {
+        await client.query("ROLLBACK");
+      }
 
+      throw error;
+    } finally {
+      if (client) {
+        client.release();
+      }
+    }
+  }
+
+  public async update(shipment: Shipment): Promise<void> {
+    let client: PoolClient | null = null;
+
+    try {
+      client = await this.pg.connect();
+
+      await client.query("BEGIN");
+
+      const query = `
+        UPDATE shipments
+        SET
+          user_id = $1,
+          origin_city_id = $2,
+          destination_city_id = $3,
+          package_weight_kg = $4,
+          package_length_cm = $5,
+          package_width_cm = $6,
+          package_height_cm = $7,
+          calculated_weight_kg = $8,
+          quoted_value = $9,
+          updated_at = $10
+        WHERE id = $11;
+      `;
+
+      const values = [
+        shipment.userId,
+        shipment.originCityId,
+        shipment.destinationCityId,
+        shipment.packageWeightKg,
+        shipment.packageLengthCm,
+        shipment.packageWidthCm,
+        shipment.packageHeightCm,
+        shipment.calculatedWeightKg,
+        shipment.quotedValue,
+        shipment.updatedAt,
+        shipment.id,
+      ];
+
+      await client.query(query, values);
       await client.query("COMMIT");
     } catch (error) {
       if (client) {

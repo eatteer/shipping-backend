@@ -25,8 +25,8 @@ export const CONFIG_SCHEMA = {
   },
 } as const satisfies JSONSchema;
 
-export type EnvSchema = FromSchema<typeof CONFIG_SCHEMA>;
+export type Config = FromSchema<typeof CONFIG_SCHEMA>;
 
-export function getEnv(fastify: FastifyInstance): EnvSchema {
+export function getEnv(fastify: FastifyInstance): Config {
   return fastify.getEnvs();
 }

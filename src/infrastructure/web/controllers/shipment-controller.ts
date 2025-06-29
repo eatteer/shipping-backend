@@ -4,6 +4,7 @@ import { ApplicationError } from "@domain/errors/application-error";
 import { NotFoundError } from "@domain/errors/not-found-error";
 import { SameOriginDestinationCityError } from "@domain/errors/same-origin-destination-city-error";
 import { ValidationError } from "@domain/errors/validation-error";
+import { UserPayload } from "@infrastructure/web/entities/user-payload";
 import {
   CREATE_SHIPMENT_BODY_SCHEMA,
   QUOTE_SHIPMENT_BODY_SCHEMA,
@@ -60,8 +61,8 @@ export class ShipmentController {
     reply: FastifyReply
   ): Promise<void> {
     try {
-      // @ts-expect-error
-      const userId = request.user.userId;
+      const userPayload = request.user as UserPayload;
+      const userId = userPayload.userId;
 
       const {
         originCityId,

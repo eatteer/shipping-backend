@@ -2,23 +2,21 @@ import { FastifyInstance } from "fastify";
 import { FastifyEnvOptions } from "@fastify/env";
 import { FastifyJWTOptions } from "@fastify/jwt";
 import { FastifyPostgresOptions, FastifyPostgres } from "@fastify/postgres";
-import { EnvSchema } from "src/config";
+import { Config } from "src/config";
+import { UserPayload } from "@infrastructure/web/entities/user-payload";
 
 declare module "fastify" {
   export interface FastifyInstance {
-    config: EnvSchema;
+    config: Config;
     jwt: FastifyJWTOptions["jwt"];
     pg: FastifyPostgres;
-    // authenticate: (
-    //   request: FastifyRequest,
-    //   reply: FastifyReply
-    // ) => Promise<void>;
+    authenticate: (
+      request: FastifyRequest,
+      reply: FastifyReply
+    ) => Promise<void>;
   }
 
   interface FastifyRequest {
-    user: {
-      id: string;
-      email: string;
-    };
+    user: UserPayload;
   }
 }

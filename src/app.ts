@@ -1,21 +1,24 @@
 import "dotenv/config";
 
-import { asClass, asFunction, createContainer, InjectionMode } from "awilix";
-import Fastify, { FastifyReply, FastifyRequest } from "fastify";
-
-// Fastify plugins
 import { FastifyAwilixOptions, fastifyAwilixPlugin } from "@fastify/awilix";
 import fastifyEnvPlugin from "@fastify/env";
 import fastifyJwtPlugin from "@fastify/jwt";
 import fastifyPostgresPlugin from "@fastify/postgres";
 import { TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
+import { asClass, asFunction, createContainer, InjectionMode } from "awilix";
+import Fastify, { FastifyReply, FastifyRequest } from "fastify";
 
 // Repositories
+import { PostgresCityRepository } from "@infrastructure/database/postgres-city-repository";
+import { PostgresRateRepository } from "@infrastructure/database/postgres-rate-repository";
+import { PostgresShipmentRepository } from "@infrastructure/database/postgres-shipment-repository";
 import { PostgresUserRepository } from "@infrastructure/database/postgres-user-repository";
 
 // Use cases
 import { AuthenticateUser } from "@application/use-cases/auth/authenticate-user";
 import { RegisterUser } from "@application/use-cases/auth/register-user";
+import { QuoteShipment } from "@application/use-cases/quotes/quote-shipment";
+import { CreateShipment } from "@application/use-cases/shipments/create-shipment";
 
 // Services
 import { BcryptPasswordService } from "@application/services/password-service";
@@ -23,16 +26,13 @@ import { FastifyJwtTokenService } from "@application/services/token-service";
 
 // Controllers
 import { AuthController } from "@infrastructure/web/controllers/auth-controller";
+import { ShipmentController } from "@infrastructure/web/controllers/shipment-controller";
 
 // Routes
-import { QuoteShipment } from "@application/use-cases/quotes/quote-shipment";
-import { PostgresCityRepository } from "@infrastructure/database/postgres-city-repository";
-import { PostgresRateRepository } from "@infrastructure/database/postgres-rate-repository";
-import { ShipmentController } from "@infrastructure/web/controllers/shipment-controller";
 import { authRoutes } from "@infrastructure/web/routes/auth-routes";
 import { shipmentRoutes } from "@infrastructure/web/routes/shipment-routes";
-import { PostgresShipmentRepository } from "@infrastructure/database/postgres-shipment-repository";
-import { CreateShipment } from "@application/use-cases/shipments/create-shipment";
+
+// Config
 import { CONFIG_SCHEMA, getEnv } from "src/config";
 
 // Configuration schema for environment plugin
