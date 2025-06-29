@@ -15,10 +15,10 @@
     "allowJs": true,
     "baseUrl": ".",
     "paths": {
+      "@src/*": ["./src/*"],
       "@domain/*": ["./src/domain/*"],
       "@application/*": ["./src/application/*"],
-      "@infrastructure/*": ["./src/infrastructure/*"],
-      "@config/*": ["./src/config/*"]
+      "@infrastructure/*": ["./src/infrastructure/*"]
     }
   },
   "include": ["src/**/*.ts", "tests/**/*.ts"],

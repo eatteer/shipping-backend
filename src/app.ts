@@ -1,3 +1,12 @@
+import * as ModuleAlias from "module-alias";
+
+ModuleAlias.addAliases({
+  "@src": `${__dirname}`,
+  "@domain": `${__dirname}/domain`,
+  "@application": `${__dirname}/application`,
+  "@infrastructure": `${__dirname}/infrastructure`,
+});
+
 import "dotenv/config";
 
 import { FastifyAwilixOptions, fastifyAwilixPlugin } from "@fastify/awilix";
@@ -28,6 +37,7 @@ import { GetShipmentTrackingDetails } from "@application/use-cases/shipments/get
 import { BcryptPasswordService } from "@application/services/password-service";
 import { FastifyJwtTokenService } from "@application/services/token-service";
 import { WebSocketService } from "@infrastructure/web/websocket/websocket-service";
+import { PostgresNotificationService } from "@infrastructure/database/postgres-notification-service";
 
 // Controllers
 import { AuthController } from "@infrastructure/web/controllers/auth-controller";
@@ -36,11 +46,10 @@ import { ShipmentController } from "@infrastructure/web/controllers/shipment-con
 // Routes
 import { authRoutes } from "@infrastructure/web/routes/auth-routes";
 import { shipmentRoutes } from "@infrastructure/web/routes/shipment-routes";
+import { websocketRoutes } from "@infrastructure/web/routes/websocket-routes";
 
 // Config
-import { CONFIG_SCHEMA, getEnv } from "src/config";
-import { websocketRoutes } from "@infrastructure/web/routes/websocket-routes";
-import { PostgresNotificationService } from "@infrastructure/database/postgres-notification-service";
+import { CONFIG_SCHEMA, getEnv } from "@src/config";
 
 // Configuration schema for environment plugin
 export async function buildApp() {
@@ -168,16 +177,13 @@ export async function buildApp() {
   });
 
   // Configure hooks
-  fastify.decorate(
-    "authenticate",
-    async (request: FastifyRequest, reply: FastifyReply) => {
-      try {
-        await request.jwtVerify();
-      } catch (err) {
-        reply.send(err);
-      }
+  fastify.decorate("authenticate", async (request, reply) => {
+    try {
+      await request.jwtVerify();
+    } catch (err) {
+      reply.send(err);
     }
-  );
+  });
 
   fastify.addHook("onReady", async () => {
     const postgresNotificationService =

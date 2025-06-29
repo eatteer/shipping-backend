@@ -1,5 +1,4 @@
 import { GetShipmentTrackingDetails } from "@application/use-cases/shipments/get-shipment-tracking-details";
-import { UserPayload } from "@infrastructure/web/entities/user-payload";
 import { WebSocketService } from "@infrastructure/web/websocket/websocket-service";
 import { FastifyInstance } from "fastify";
 
@@ -16,19 +15,15 @@ export async function websocketRoutes(
     "/ws/shipments/:id/track",
     {
       websocket: true,
-      // @ts-expect-error
       onRequest: [fastify.authenticate],
     },
     async (connection, req) => {
       const { id: shipmentId } = req.params as { id: string };
-      let userPayload: UserPayload | undefined;
 
       try {
-        userPayload = req.user as UserPayload;
-
         await getShipmentTrackingDetails.execute({
           shipmentId,
-          userId: userPayload.userId,
+          userId: req.user.userId,
         });
 
         webSocketService.registerConnection(shipmentId, connection);

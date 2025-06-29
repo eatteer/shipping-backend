@@ -5,7 +5,6 @@ import { ApplicationError } from "@domain/errors/application-error";
 import { NotFoundError } from "@domain/errors/not-found-error";
 import { SameOriginDestinationCityError } from "@domain/errors/same-origin-destination-city-error";
 import { ValidationError } from "@domain/errors/validation-error";
-import { UserPayload } from "@infrastructure/web/entities/user-payload";
 import {
   CreateShipmentBody,
   GetShipmentTrackingParams,
@@ -60,9 +59,6 @@ export class ShipmentController {
     reply: FastifyReply
   ): Promise<void> {
     try {
-      const userPayload = request.user as UserPayload;
-      const userId = userPayload.userId;
-
       const {
         originCityId,
         destinationCityId,
@@ -73,7 +69,7 @@ export class ShipmentController {
       } = request.body;
 
       await this.createShipment.execute({
-        userId,
+        userId: request.user.userId,
         originCityId,
         destinationCityId,
         packageWeightKg,
@@ -123,15 +119,12 @@ export class ShipmentController {
     request: FastifyRequest<{ Params: GetShipmentTrackingParams }>,
     reply: FastifyReply
   ) {
-    const userPayload = request.user as UserPayload;
-    const userId = userPayload.userId;
-
     const { id: shipmentId } = request.params;
 
     try {
       const trackingDetails = await this.getShipmentTrackingDetails.execute({
         shipmentId,
-        userId,
+        userId: request.user.userId,
       });
 
       reply.status(200).send(trackingDetails);

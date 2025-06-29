@@ -21,7 +21,6 @@ export async function shipmentRoutes(
       schema: {
         body: QUOTE_SHIPMENT_BODY_SCHEMA,
       },
-      // @ts-expect-error
       onRequest: [fastify.authenticate],
     },
     shipmentController.quote.bind(shipmentController)
@@ -33,7 +32,6 @@ export async function shipmentRoutes(
       schema: {
         body: CREATE_SHIPMENT_BODY_SCHEMA,
       },
-      // @ts-expect-error
       onRequest: [fastify.authenticate],
     },
     shipmentController.create.bind(shipmentController)
@@ -45,7 +43,6 @@ export async function shipmentRoutes(
       schema: {
         params: GET_SHIPMENT_TRACKING_PARAMS_SCHEMA,
       },
-      // @ts-expect-error
       onRequest: [fastify.authenticate],
     },
     shipmentController.getTrackingDetails.bind(shipmentController)

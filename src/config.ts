@@ -28,5 +28,5 @@ export const CONFIG_SCHEMA = {
 export type Config = FromSchema<typeof CONFIG_SCHEMA>;
 
 export function getEnv(fastify: FastifyInstance): Config {
-  return fastify.getEnvs();
+  return fastify.getEnvs<Config>();
 }

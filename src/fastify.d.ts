@@ -6,17 +6,19 @@ import { Config } from "src/config";
 import { UserPayload } from "@infrastructure/web/entities/user-payload";
 
 declare module "fastify" {
-  export interface FastifyInstance {
+  interface FastifyInstance {
     config: Config;
     jwt: FastifyJWTOptions["jwt"];
     pg: FastifyPostgres;
-    // authenticate: (
-    //   request: FastifyRequest,
-    //   reply: FastifyReply
-    // ) => Promise<void>;
+    authenticate: (
+      request: FastifyRequest<unknown>,
+      reply: FastifyReply<unknown>
+    ) => Promise<void>;
   }
+}
 
-  interface FastifyRequest {
+declare module "@fastify/jwt" {
+  interface FastifyJWT {
     user: UserPayload;
   }
 }
