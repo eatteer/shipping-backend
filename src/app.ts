@@ -5,6 +5,7 @@ import fastifyEnvPlugin from "@fastify/env";
 import fastifyJwtPlugin from "@fastify/jwt";
 import fastifyPostgresPlugin from "@fastify/postgres";
 import { TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
+import websocket from "@fastify/websocket";
 import { asClass, asFunction, createContainer, InjectionMode } from "awilix";
 import Fastify, { FastifyReply, FastifyRequest } from "fastify";
 
@@ -13,18 +14,20 @@ import { PostgresCityRepository } from "@infrastructure/database/postgres-city-r
 import { PostgresRateRepository } from "@infrastructure/database/postgres-rate-repository";
 import { PostgresShipmentRepository } from "@infrastructure/database/postgres-shipment-repository";
 import { PostgresShipmentStatusHistoryRepository } from "@infrastructure/database/postgres-shipment-status-history-repository";
-import { PostgresUserRepository } from "@infrastructure/database/postgres-user-repository";
 import { PostgresShipmentStatusRepository } from "@infrastructure/database/postgres-shipment-status-repository";
+import { PostgresUserRepository } from "@infrastructure/database/postgres-user-repository";
 
 // Use cases
 import { AuthenticateUser } from "@application/use-cases/auth/authenticate-user";
 import { RegisterUser } from "@application/use-cases/auth/register-user";
 import { QuoteShipment } from "@application/use-cases/quotes/quote-shipment";
 import { CreateShipment } from "@application/use-cases/shipments/create-shipment";
+import { GetShipmentTrackingDetails } from "@application/use-cases/shipments/get-shipment-tracking-details";
 
 // Services
 import { BcryptPasswordService } from "@application/services/password-service";
 import { FastifyJwtTokenService } from "@application/services/token-service";
+import { WebSocketService } from "@infrastructure/web/websocket/websocket-service";
 
 // Controllers
 import { AuthController } from "@infrastructure/web/controllers/auth-controller";
@@ -36,7 +39,8 @@ import { shipmentRoutes } from "@infrastructure/web/routes/shipment-routes";
 
 // Config
 import { CONFIG_SCHEMA, getEnv } from "src/config";
-import { GetShipmentTrackingDetails } from "@application/use-cases/shipments/get-shipment-tracking-details";
+import { websocketRoutes } from "@infrastructure/web/routes/websocket-routes";
+import { PostgresNotificationService } from "@infrastructure/database/postgres-notification-service";
 
 // Configuration schema for environment plugin
 export async function buildApp() {
@@ -51,6 +55,8 @@ export async function buildApp() {
     dotenv: true, // Enable dotenv through fastify-env
     data: process.env,
   });
+
+  await fastify.register(websocket);
 
   // Register JWT plugin
   await fastify.register(fastifyJwtPlugin, {
@@ -78,6 +84,7 @@ export async function buildApp() {
   });
 
   container.register({
+    webSocketService: asClass(WebSocketService).singleton(),
     // Repositories
     userRepository: asFunction(
       () => new PostgresUserRepository(fastify.pg)
@@ -99,9 +106,14 @@ export async function buildApp() {
     ).singleton(),
 
     // Services
+    pg: asFunction(() => fastify.pg).singleton(),
     passwordService: asClass(BcryptPasswordService).singleton(),
     tokenService: asFunction(
       () => new FastifyJwtTokenService(fastify)
+    ).singleton(),
+    websocketService: asClass(WebSocketService).singleton(),
+    postgresNotificationService: asClass(
+      PostgresNotificationService
     ).singleton(),
 
     // Use cases
@@ -140,6 +152,21 @@ export async function buildApp() {
     { prefix: "/shipments" }
   );
 
+  fastify.register(async (instance) => {
+    const webSocketService =
+      instance.diContainer.resolve<WebSocketService>("webSocketService");
+
+    const getShipmentTrackingDetails =
+      instance.diContainer.resolve<GetShipmentTrackingDetails>(
+        "getShipmentTrackingDetails"
+      );
+
+    await websocketRoutes(instance, {
+      webSocketService,
+      getShipmentTrackingDetails,
+    });
+  });
+
   // Configure hooks
   fastify.decorate(
     "authenticate",
@@ -151,6 +178,24 @@ export async function buildApp() {
       }
     }
   );
+
+  fastify.addHook("onReady", async () => {
+    const postgresNotificationService =
+      fastify.diContainer.resolve<PostgresNotificationService>(
+        "postgresNotificationService"
+      );
+
+    await postgresNotificationService.startListening();
+  });
+
+  fastify.addHook("onClose", async () => {
+    const postgresNotificationService =
+      fastify.diContainer.resolve<PostgresNotificationService>(
+        "postgresNotificationService"
+      );
+
+    await postgresNotificationService.stopListening();
+  });
 
   return fastify;
 }

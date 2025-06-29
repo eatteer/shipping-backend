@@ -6,4 +6,5 @@ export interface ShipmentRepository {
   findAll(): Promise<Shipment[]>;
   save(shipment: Shipment): Promise<void>;
   update(shipment: Shipment): Promise<void>;
+  updateStatus(shipmentId: string, newStatusId: string): Promise<void>;
 }

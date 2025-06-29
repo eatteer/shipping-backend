@@ -150,13 +150,35 @@ ON CONFLICT (id) DO NOTHING;
 
 CREATE OR REPLACE FUNCTION log_shipment_status_change()
 RETURNS TRIGGER AS $$
+DECLARE
+    notification_payload JSON;
+    new_status_name TEXT;
 BEGIN
+    -- Only if current_status_id has changed
     IF OLD.current_status_id IS DISTINCT FROM NEW.current_status_id THEN
-
+        -- Insert the record into the status history
         INSERT INTO shipment_status_history (shipment_id, status_id, timestamp)
         VALUES (NEW.id, NEW.current_status_id, CURRENT_TIMESTAMP);
 
+        -- Update the shipment's modification timestamp
         NEW.updated_at = CURRENT_TIMESTAMP;
+
+        -- Get the name of the new status for the notification payload
+        SELECT name INTO new_status_name
+        FROM status_types
+        WHERE id = NEW.current_status_id;
+
+        -- Build the JSON payload for the notification
+        notification_payload := json_build_object(
+            'shipmentId', NEW.id,
+            'newStatusId', NEW.current_status_id,
+            'newStatusName', new_status_name,
+            'timestamp', to_char(CURRENT_TIMESTAMP, 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"') -- ISO 8601 format
+        );
+
+        -- Send the notification to a specific channel
+        -- 'shipment_updates' is the channel name. It must be consistent with the listener in the backend.
+        PERFORM pg_notify('shipment_updates', notification_payload::text);
     END IF;
 
     RETURN NEW;

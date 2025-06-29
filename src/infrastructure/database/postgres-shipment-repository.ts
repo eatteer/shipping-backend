@@ -4,11 +4,7 @@ import { PostgresDb } from "@fastify/postgres";
 import { PoolClient } from "pg";
 
 export class PostgresShipmentRepository implements ShipmentRepository {
-  private readonly pg: PostgresDb;
-
-  public constructor(pg: PostgresDb) {
-    this.pg = pg;
-  }
+  public constructor(private readonly pg: PostgresDb) {}
 
   private mapRowToShipment(row: any): Shipment {
     return new Shipment({
@@ -56,6 +52,7 @@ export class PostgresShipmentRepository implements ShipmentRepository {
 
   public async save(shipment: Shipment): Promise<void> {
     let client: PoolClient | null = null;
+
     try {
       client = await this.pg.connect();
 
@@ -137,6 +134,42 @@ export class PostgresShipmentRepository implements ShipmentRepository {
         shipment.updatedAt,
         shipment.id,
       ];
+
+      await client.query(query, values);
+      await client.query("COMMIT");
+    } catch (error) {
+      if (client) {
+        await client.query("ROLLBACK");
+      }
+
+      throw error;
+    } finally {
+      if (client) {
+        client.release();
+      }
+    }
+  }
+
+  public async updateStatus(
+    shipmentId: string,
+    newStatusId: string
+  ): Promise<void> {
+    let client: PoolClient | null = null;
+
+    try {
+      client = await this.pg.connect();
+
+      await client.query("BEGIN");
+
+      const query = `
+        UPDATE shipments
+        SET
+          current_status_id = $1,
+          updated_at = NOW()
+        WHERE id = $2;
+      `;
+
+      const values = [newStatusId, shipmentId];
 
       await client.query(query, values);
       await client.query("COMMIT");
