@@ -9,12 +9,27 @@ import { ValidationError } from "@domain/errors/validation-error";
 import { FastifyError, FastifyInstance } from "fastify";
 import fp from "fastify-plugin";
 
+/**
+ * Global error handler plugin for Fastify application.
+ * 
+ * This plugin provides centralized error handling for all domain errors and HTTP errors.
+ * It maps domain-specific errors to appropriate HTTP status codes and provides
+ * structured error responses with consistent format.
+ * 
+ * @param fastify - The Fastify instance to register the error handler on
+ * 
+ * @example
+ * ```typescript
+ * // Register the error handler plugin
+ * await fastify.register(errorHandlerPlugin);
+ * ```
+ * 
+ * @throws {FastifyError} When error handling fails internally
+ * 
+ * @since 1.0.0
+ */
 export const errorHandlerPlugin = fp(function (fastify: FastifyInstance) {
   fastify.setErrorHandler((error: FastifyError, request, reply) => {
-    console.log("--------------------- ERROR HANDLER");
-    console.log("Error type:", error.constructor.name);
-    console.log("Error message:", error.message);
-
     request.log.error(error);
 
     // Handle JWT errors
