@@ -13,10 +13,11 @@ import { FastifyAwilixOptions, fastifyAwilixPlugin } from "@fastify/awilix";
 import fastifyEnvPlugin from "@fastify/env";
 import fastifyJwtPlugin from "@fastify/jwt";
 import fastifyPostgresPlugin from "@fastify/postgres";
+import fastifyRedis from "@fastify/redis";
 import { TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
 import websocket from "@fastify/websocket";
 import { asClass, asFunction, createContainer, InjectionMode } from "awilix";
-import Fastify, { FastifyReply, FastifyRequest } from "fastify";
+import Fastify from "fastify";
 
 // Repositories
 import { PostgresCityRepository } from "@infrastructure/database/postgres-city-repository";
@@ -36,8 +37,8 @@ import { GetShipmentTrackingDetails } from "@application/use-cases/shipments/get
 // Services
 import { BcryptPasswordService } from "@application/services/password-service";
 import { FastifyJwtTokenService } from "@application/services/token-service";
-import { WebSocketService } from "@infrastructure/web/websocket/websocket-service";
 import { PostgresNotificationService } from "@infrastructure/database/postgres-notification-service";
+import { WebSocketService } from "@infrastructure/web/websocket/websocket-service";
 
 // Controllers
 import { AuthController } from "@infrastructure/web/controllers/auth-controller";
@@ -84,7 +85,10 @@ export async function buildApp() {
     }`,
   });
 
-  // Wait for the database connection to be ready
+  await fastify.register(fastifyRedis, {
+    url: `redis://${getEnv(fastify).REDIS_HOST}:${getEnv(fastify).REDIS_PORT}`,
+  });
+
   await fastify.after();
 
   // Configure the Dependency Injection Container (Awilix)
@@ -93,7 +97,9 @@ export async function buildApp() {
   });
 
   container.register({
-    webSocketService: asClass(WebSocketService).singleton(),
+    pg: asFunction(() => fastify.pg).singleton(),
+    redis: asFunction(() => fastify.redis).singleton(),
+
     // Repositories
     userRepository: asFunction(
       () => new PostgresUserRepository(fastify.pg)
@@ -115,12 +121,11 @@ export async function buildApp() {
     ).singleton(),
 
     // Services
-    pg: asFunction(() => fastify.pg).singleton(),
     passwordService: asClass(BcryptPasswordService).singleton(),
     tokenService: asFunction(
       () => new FastifyJwtTokenService(fastify)
     ).singleton(),
-    websocketService: asClass(WebSocketService).singleton(),
+    webSocketService: asClass(WebSocketService).singleton(),
     postgresNotificationService: asClass(
       PostgresNotificationService
     ).singleton(),

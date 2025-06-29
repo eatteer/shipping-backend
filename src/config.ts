@@ -14,7 +14,9 @@ export const CONFIG_SCHEMA = {
     "JWT_EXPIRES_IN",
   ],
   properties: {
-    PORT: { type: "number", default: 3000 },
+    PORT: { type: "number" },
+    REDIS_HOST: { type: "string" },
+    REDIS_PORT: { type: "number" },
     DB_HOST: { type: "string" },
     DB_PORT: { type: "number" },
     DB_USER: { type: "string" },
