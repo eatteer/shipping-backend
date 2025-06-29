@@ -1,7 +1,6 @@
 import { ShipmentStatus } from "@domain/entities/shipment-status";
 import { ShipmentStatusRepository } from "@domain/repositories/shipment-status-repository";
 import { PostgresDb } from "@fastify/postgres";
-import { UUID } from "crypto";
 
 export class PostgresShipmentStatusRepository
   implements ShipmentStatusRepository
@@ -22,7 +21,7 @@ export class PostgresShipmentStatusRepository
     });
   }
 
-  public async findById(id: UUID): Promise<ShipmentStatus | null> {
+  public async findById(id: string): Promise<ShipmentStatus | null> {
     const result = await this.pg.query(
       "SELECT * FROM status_types WHERE id = $1",
       [id]

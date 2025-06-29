@@ -1,7 +1,5 @@
-import { UUID } from "crypto";
-
 export interface ShipmentStatusProps {
-  id: UUID;
+  id: string;
   name: string;
   description?: string;
   createdAt: Date;
@@ -9,7 +7,7 @@ export interface ShipmentStatusProps {
 }
 
 export class ShipmentStatus {
-  public readonly id: UUID;
+  public readonly id: string;
   public readonly name: string;
   public readonly description?: string;
   public readonly createdAt: Date;

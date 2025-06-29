@@ -1,16 +1,14 @@
-import { UUID } from "crypto";
-
 export interface ShipmentStatusHistoryProps {
-  id: UUID;
-  shipmentId: UUID;
-  statusId: UUID;
+  id: string;
+  shipmentId: string;
+  statusId: string;
   timestamp: Date;
 }
 
 export class ShipmentStatusHistory {
-  public readonly id: UUID;
-  public readonly shipmentId: UUID;
-  public readonly statusId: UUID;
+  public readonly id: string;
+  public readonly shipmentId: string;
+  public readonly statusId: string;
   public readonly timestamp: Date;
 
   public constructor(props: ShipmentStatusHistoryProps) {
