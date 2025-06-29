@@ -3,7 +3,7 @@ import { NotFoundError } from "@domain/errors/not-found-error";
 import { SameOriginDestinationCityError } from "@domain/errors/same-origin-destination-city-error";
 import { CityRepository } from "@domain/repositories/city-repository";
 import { RateRepository } from "@domain/repositories/rate-repository";
-import { FastifyRedis } from "@fastify/redis";
+import { CacheService } from "@src/application/services/cache-service";
 
 export interface QuoteShipmentRequest {
   originCityId: string; // Kept as string
@@ -35,7 +35,7 @@ export class QuoteShipment {
   constructor(
     private readonly cityRepository: CityRepository,
     private readonly rateRepository: RateRepository,
-    private readonly redis: FastifyRedis // Inject the Redis client here!
+    private readonly cacheService: CacheService // Inject the Redis client here!
   ) {}
 
   async execute(request: QuoteShipmentRequest): Promise<QuoteShipmentResponse> {
@@ -55,7 +55,7 @@ export class QuoteShipment {
 
     try {
       // --- 2. Attempt to retrieve the quote from Redis cache ---
-      const cachedResult = await this.redis.get(cacheKey);
+      const cachedResult = await this.cacheService.get(cacheKey);
 
       if (cachedResult) {
         // If found in cache, parse and return immediately
@@ -131,10 +131,10 @@ export class QuoteShipment {
     // --- 4. Store the result in Redis before returning it ---
     try {
       // Save the result as a JSON string with a Time To Live (TTL)
-      await this.redis.setex(
+      await this.cacheService.set(
         cacheKey,
-        this.CACHE_TTL_SECONDS,
-        JSON.stringify(result)
+        JSON.stringify(result),
+        this.CACHE_TTL_SECONDS
       );
       console.log(
         `[QuoteShipment] Quote stored in cache for key: ${cacheKey} with TTL of ${this.CACHE_TTL_SECONDS} seconds.`

@@ -35,10 +35,11 @@ import { CreateShipment } from "@application/use-cases/shipments/create-shipment
 import { GetShipmentTrackingDetails } from "@application/use-cases/shipments/get-shipment-tracking-details";
 
 // Services
-import { BcryptPasswordService } from "@application/services/password-service";
-import { FastifyJwtTokenService } from "@application/services/token-service";
+import { FastifyJwtTokenService } from "@infrastructure/security/fastify-token-service";
 import { PostgresNotificationService } from "@infrastructure/database/postgres-notification-service";
 import { WebSocketService } from "@infrastructure/web/websocket/websocket-service";
+import { RedisCacheService } from "@src/infrastructure/cache/redis-cache-service";
+import { BcryptPasswordService } from "@src/infrastructure/security/bcrypt-password-service";
 
 // Controllers
 import { AuthController } from "@infrastructure/web/controllers/auth-controller";
@@ -97,35 +98,28 @@ export async function buildApp() {
   });
 
   container.register({
+    jwt: asFunction(() => fastify.jwt).singleton(),
     pg: asFunction(() => fastify.pg).singleton(),
     redis: asFunction(() => fastify.redis).singleton(),
 
     // Repositories
-    userRepository: asFunction(
-      () => new PostgresUserRepository(fastify.pg)
+    userRepository: asClass(PostgresUserRepository).singleton(),
+    cityRepository: asClass(PostgresCityRepository).singleton(),
+    rateRepository: asClass(PostgresRateRepository).singleton(),
+    shipmentRepository: asClass(PostgresShipmentRepository).singleton(),
+    shipmentStatusRepository: asClass(
+      PostgresShipmentStatusRepository
     ).singleton(),
-    cityRepository: asFunction(
-      () => new PostgresCityRepository(fastify.pg)
-    ).singleton(),
-    rateRepository: asFunction(
-      () => new PostgresRateRepository(fastify.pg)
-    ).singleton(),
-    shipmentRepository: asFunction(
-      () => new PostgresShipmentRepository(fastify.pg)
-    ).singleton(),
-    shipmentStatusRepository: asFunction(
-      () => new PostgresShipmentStatusRepository(fastify.pg)
-    ).singleton(),
-    shipmentStatusHistoryRepository: asFunction(
-      () => new PostgresShipmentStatusHistoryRepository(fastify.pg)
+    shipmentStatusHistoryRepository: asClass(
+      PostgresShipmentStatusHistoryRepository
     ).singleton(),
 
     // Services
     passwordService: asClass(BcryptPasswordService).singleton(),
-    tokenService: asFunction(
-      () => new FastifyJwtTokenService(fastify)
-    ).singleton(),
+    tokenService: asClass(FastifyJwtTokenService).singleton(),
     webSocketService: asClass(WebSocketService).singleton(),
+    cacheService: asClass(RedisCacheService).singleton(),
+
     postgresNotificationService: asClass(
       PostgresNotificationService
     ).singleton(),
