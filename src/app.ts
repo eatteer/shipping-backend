@@ -52,6 +52,9 @@ import { authRoutes } from "@infrastructure/web/routes/auth-routes";
 import { shipmentRoutes } from "@infrastructure/web/routes/shipment-routes";
 import { websocketRoutes } from "@infrastructure/web/routes/websocket-routes";
 
+// Plugings
+import { errorHandlerPlugin } from "@src/infrastructure/web/plugins/error-handler";
+
 // Config
 import { CONFIG_SCHEMA, getEnv } from "@src/config";
 
@@ -185,6 +188,9 @@ export async function buildApp() {
   await fastify.register(fastifyAwilixPlugin, {
     container,
   } as FastifyAwilixOptions);
+
+  // Register error handler
+  fastify.register(errorHandlerPlugin);
 
   // Register Routes
   fastify.register(

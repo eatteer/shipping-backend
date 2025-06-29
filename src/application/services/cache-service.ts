@@ -1,5 +1,3 @@
-// src/domain/services/cache-service.ts
-
 export interface CacheService {
   /**
    * Retrieves a value from the cache by its key.

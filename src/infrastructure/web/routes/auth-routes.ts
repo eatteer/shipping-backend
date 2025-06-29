@@ -3,8 +3,16 @@ import { Static } from "@sinclair/typebox";
 import { AuthController } from "@infrastructure/web/controllers/auth-controller";
 import {
   AUTH_BODY_SCHEMA,
+  AUTH_RESPONSE_SCHEMA,
   REGISTER_BODY_SCHEMA,
+  REGISTER_RESPONSE_SCHEMA,
+  USER_ALREADY_EXISTS_ERROR_SCHEMA,
 } from "@infrastructure/web/schemas/auth-schemas";
+import {
+  AUTHENTICATION_ERROR_SCHEMA,
+  VALIDATION_ERROR_SCHEMA,
+  INTERNAL_SERVER_ERROR_SCHEMA,
+} from "@infrastructure/web/schemas/common-schemas";
 
 interface AuthRoutesDependencies {
   authController: AuthController;
@@ -22,19 +30,13 @@ export async function authRoutes(
         description:
           "Creates a new user account with a unique email and password.",
         tags: ["Auth"],
-        body: REGISTER_BODY_SCHEMA, // Your existing TypeBox schema for the request body
-        // response: {
-        //   201: Type.Object({ // Define the successful response (HTTP 201 Created)
-        //     message: Type.String({ example: 'User registered successfully.' }),
-        //   }),
-        //   400: Type.Object({ // Define a common error response for bad requests
-        //     message: Type.String({ example: 'Email already exists.' }), // Updated example message for clarity
-        //     code: Type.String({ example: 'USER_ALREADY_EXISTS' }),
-        //   }),
-        //   500: Type.Object({ // Define a generic internal server error response
-        //     message: Type.String({ example: 'An unexpected error occurred.' }),
-        //   }),
-        // },
+        body: REGISTER_BODY_SCHEMA,
+        response: {
+          201: REGISTER_RESPONSE_SCHEMA,
+          400: VALIDATION_ERROR_SCHEMA,
+          409: USER_ALREADY_EXISTS_ERROR_SCHEMA,
+          500: INTERNAL_SERVER_ERROR_SCHEMA,
+        },
       },
     },
     authController.register.bind(authController)
@@ -49,21 +51,11 @@ export async function authRoutes(
           "Authenticates a user with an email and password, returning a JSON Web Token (JWT) upon successful login.",
         tags: ["Auth"],
         body: AUTH_BODY_SCHEMA,
-        // response: {
-        //   200: Type.Object({ // Define the successful response (HTTP 200 OK)
-        //     token: Type.String({
-        //       description: 'JWT authentication token',
-        //       example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIwYmE3ZDAwMi03YjYzLTQzNDYtYjYxMi0zMjEwMzIyZGE5NjIiLCJ1c2VybmFtZSI6ImV4YW1wbGV1c2VyIiwiaWF0IjoxNjU0OTI3MDAwLCJleHAiOjE2NTQ5MzU2MDB9.someRandomJwtSignature',
-        //     }),
-        //   }),
-        //   401: Type.Object({ // Define a common error response for unauthorized access
-        //     message: Type.String({ example: 'Invalid credentials.' }),
-        //     code: Type.String({ example: 'INVALID_CREDENTIALS' }),
-        //   }),
-        //   500: Type.Object({ // Define a generic internal server error response
-        //     message: Type.String({ example: 'An unexpected error occurred.' }),
-        //   }),
-        // },
+        response: {
+          200: AUTH_RESPONSE_SCHEMA,
+          401: AUTHENTICATION_ERROR_SCHEMA,
+          500: INTERNAL_SERVER_ERROR_SCHEMA,
+        },
       },
     },
     authController.authenticate.bind(authController)

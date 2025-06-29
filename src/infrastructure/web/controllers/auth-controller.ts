@@ -16,7 +16,7 @@ export class AuthController {
   public constructor(
     private readonly registerUser: RegisterUser,
     private readonly authenticateUser: AuthenticateUser
-  ) {}
+  ) { }
 
   public async register(
     request: FastifyRequest<{ Body: RegisterBody }>,
@@ -30,7 +30,7 @@ export class AuthController {
         password,
       });
 
-      reply.code(201).send(response);
+      reply.code(201).send({ message: "User registered successfully" });
     } catch (error: unknown) {
       if (error instanceof AuthenticationError) {
         return reply

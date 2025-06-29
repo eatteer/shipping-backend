@@ -7,7 +7,7 @@ export type ShipmentStatusUpdateMessage = {
   timestamp: string;
 };
 
-type ShipmentConnections = {
+export type ShipmentConnections = {
   [shipmentId: string]: Set<WebSocket>;
 };
 
@@ -22,7 +22,7 @@ export class WebSocketService {
     this.connections[shipmentId].add(ws);
 
     console.log(
-      `[WebSocketService] Customer connected to shipment ${shipmentId}. Total for this shipment: ${this.connections[shipmentId].size}`
+      `[WebSocketService] Customer connected to shipment ${shipmentId}`
     );
 
     ws.on("close", () => {
@@ -48,9 +48,7 @@ export class WebSocketService {
       }
 
       console.log(
-        `[WebSocketService] Customer disconnected from shipment ${shipmentId}. Total for this shipment: ${
-          this.connections[shipmentId]?.size || 0
-        }`
+        `[WebSocketService] Customer disconnected from shipment ${shipmentId}`
       );
     }
   }
