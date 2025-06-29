@@ -12,7 +12,7 @@ export class RegisterUser {
   public constructor(
     private readonly userRepository: UserRepository,
     private readonly passwordService: PasswordService
-  ) { }
+  ) {}
 
   public async execute(request: RegisterUserRequest): Promise<void> {
     // 1. Check if a user with the provided email already exists

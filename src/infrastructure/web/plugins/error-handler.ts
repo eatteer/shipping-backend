@@ -7,10 +7,32 @@ import { TokenExpiredError } from "@domain/errors/token-expired-error";
 import { UserAlreadyExists } from "@domain/errors/user-already-exists-error";
 import { ValidationError } from "@domain/errors/validation-error";
 import { FastifyError, FastifyInstance } from "fastify";
+import fp from "fastify-plugin";
 
-export function errorHandlerPlugin(fastify: FastifyInstance) {
+export const errorHandlerPlugin = fp(function (fastify: FastifyInstance) {
   fastify.setErrorHandler((error: FastifyError, request, reply) => {
+    console.log("--------------------- ERROR HANDLER");
+    console.log("Error type:", error.constructor.name);
+    console.log("Error message:", error.message);
+
     request.log.error(error);
+
+    // Handle JWT errors
+    if (error.name === "JsonWebTokenError") {
+      return reply.status(401).send({
+        message: "Invalid token",
+        code: "INVALID_TOKEN",
+        name: "InvalidTokenError",
+      });
+    }
+
+    if (error.name === "TokenExpiredError") {
+      return reply.status(401).send({
+        message: "Token expired",
+        code: "TOKEN_EXPIRED",
+        name: "TokenExpiredError",
+      });
+    }
 
     // 401 Unauthorized - Authentication and token errors
     if (
@@ -64,6 +86,6 @@ export function errorHandlerPlugin(fastify: FastifyInstance) {
       });
     }
 
-    reply.send(error);
+    throw error;
   });
-}
+});

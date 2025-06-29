@@ -64,6 +64,9 @@ export async function buildApp() {
     logger: true,
   }).withTypeProvider<TypeBoxTypeProvider>();
 
+  // Register error handler routes
+  await fastify.register(errorHandlerPlugin);
+
   // Register environment plugin
   await fastify.register(fastifyEnvPlugin, {
     confKey: "config",
@@ -84,11 +87,9 @@ export async function buildApp() {
 
   // Register PostgreSQL plugin
   await fastify.register(fastifyPostgresPlugin, {
-    connectionString: `postgres://${getEnv(fastify).DB_USER}:${
-      getEnv(fastify).DB_PASSWORD
-    }@${getEnv(fastify).DB_HOST}:${getEnv(fastify).DB_PORT}/${
-      getEnv(fastify).DB_NAME
-    }`,
+    connectionString: `postgres://${getEnv(fastify).DB_USER}:${getEnv(fastify).DB_PASSWORD
+      }@${getEnv(fastify).DB_HOST}:${getEnv(fastify).DB_PORT}/${getEnv(fastify).DB_NAME
+      }`,
   });
 
   await fastify.register(fastifyRedis, {
@@ -189,11 +190,17 @@ export async function buildApp() {
     container,
   } as FastifyAwilixOptions);
 
-  // Register error handler
-  fastify.register(errorHandlerPlugin);
+  // Configure hooks BEFORE routes
+  fastify.decorate("authenticate", async (request, reply) => {
+    try {
+      await request.jwtVerify();
+    } catch (err) {
+      reply.send(err);
+    }
+  });
 
   // Register Routes
-  fastify.register(
+  await fastify.register(
     async (instance) => {
       const authController =
         instance.diContainer.resolve<AuthController>("authController");
@@ -202,7 +209,7 @@ export async function buildApp() {
     { prefix: "/auth" }
   );
 
-  fastify.register(
+  await fastify.register(
     async (instance) => {
       const shipmentController =
         instance.diContainer.resolve<ShipmentController>("shipmentController");
@@ -211,7 +218,7 @@ export async function buildApp() {
     { prefix: "/shipments" }
   );
 
-  fastify.register(async (instance) => {
+  await fastify.register(async (instance) => {
     const webSocketService =
       instance.diContainer.resolve<WebSocketService>("webSocketService");
 
@@ -224,15 +231,6 @@ export async function buildApp() {
       webSocketService,
       getShipmentTrackingDetails,
     });
-  });
-
-  // Configure hooks
-  fastify.decorate("authenticate", async (request, reply) => {
-    try {
-      await request.jwtVerify();
-    } catch (err) {
-      reply.send(err);
-    }
   });
 
   fastify.addHook("onReady", async () => {
