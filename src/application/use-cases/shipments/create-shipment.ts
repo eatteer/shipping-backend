@@ -1,4 +1,4 @@
-import { QuoteShipment } from "@application/use-cases/quotes/quote-shipment";
+import { QuoteShipment } from "@src/application/use-cases/shipments/quote-shipment";
 import { Shipment } from "@domain/entities/shipment";
 import { NotFoundError } from "@domain/errors/not-found-error";
 import { ShipmentRepository } from "@domain/repositories/shipment-repository";

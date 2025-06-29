@@ -14,6 +14,8 @@ import fastifyEnvPlugin from "@fastify/env";
 import fastifyJwtPlugin from "@fastify/jwt";
 import fastifyPostgresPlugin from "@fastify/postgres";
 import fastifyRedis from "@fastify/redis";
+import fastifySwagger from "@fastify/swagger";
+import fastifySwaggerUi from "@fastify/swagger-ui";
 import { TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
 import websocket from "@fastify/websocket";
 import { asClass, asFunction, createContainer, InjectionMode } from "awilix";
@@ -30,13 +32,13 @@ import { PostgresUserRepository } from "@infrastructure/database/postgres-user-r
 // Use cases
 import { AuthenticateUser } from "@application/use-cases/auth/authenticate-user";
 import { RegisterUser } from "@application/use-cases/auth/register-user";
-import { QuoteShipment } from "@application/use-cases/quotes/quote-shipment";
+import { QuoteShipment } from "@src/application/use-cases/shipments/quote-shipment";
 import { CreateShipment } from "@application/use-cases/shipments/create-shipment";
 import { GetShipmentTrackingDetails } from "@application/use-cases/shipments/get-shipment-tracking-details";
 
 // Services
-import { FastifyJwtTokenService } from "@infrastructure/security/fastify-token-service";
 import { PostgresNotificationService } from "@infrastructure/database/postgres-notification-service";
+import { FastifyJwtTokenService } from "@infrastructure/security/fastify-token-service";
 import { WebSocketService } from "@infrastructure/web/websocket/websocket-service";
 import { RedisCacheService } from "@src/infrastructure/cache/redis-cache-service";
 import { BcryptPasswordService } from "@src/infrastructure/security/bcrypt-password-service";
@@ -88,6 +90,49 @@ export async function buildApp() {
 
   await fastify.register(fastifyRedis, {
     url: `redis://${getEnv(fastify).REDIS_HOST}:${getEnv(fastify).REDIS_PORT}`,
+  });
+
+  await fastify.register(fastifySwagger, {
+    openapi: {
+      info: {
+        title: "Shipment Tracking API",
+        description: "API documentation shipment tracking service",
+        version: "1.0.0",
+      },
+      servers: [
+        {
+          url: `http://127.0.0.1:${getEnv(fastify).PORT}`,
+          description: "Development Server",
+        },
+      ],
+      components: {
+        securitySchemes: {
+          bearerAuth: {
+            type: "http",
+            scheme: "bearer",
+            bearerFormat: "JWT",
+          },
+        },
+      },
+      tags: [
+        { name: "Auth", description: "User authentication related endpoints" },
+        {
+          name: "Shipments",
+          description: "Shipment management and tracking endpoints",
+        },
+      ],
+    },
+  });
+
+  await fastify.register(fastifySwaggerUi, {
+    routePrefix: "/documentation",
+    uiConfig: {
+      docExpansion: "list",
+      filter: true,
+      displayRequestDuration: true,
+    },
+    staticCSP: true, // Content Security Policy
+    transformStaticCSP: (header) => header, // Custom transformation if needed
   });
 
   await fastify.after();

@@ -1,4 +1,4 @@
-import { QuoteShipment } from "@application/use-cases/quotes/quote-shipment";
+import { QuoteShipment } from "@src/application/use-cases/shipments/quote-shipment";
 import { CreateShipment } from "@application/use-cases/shipments/create-shipment";
 import { GetShipmentTrackingDetails } from "@application/use-cases/shipments/get-shipment-tracking-details";
 import { ApplicationError } from "@domain/errors/application-error";
