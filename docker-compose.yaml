@@ -11,6 +11,12 @@ services:
       depends_on:
         - shipping-backend-prod
 
+  shipping-frontend-prod:
+    container_name: shipping-frontend-prod
+    image: shipping-frontend-prod
+    ports:
+      - "8081:80"
+
   shipping-backend-prod:
     container_name: shipping-backend-prod
     build:
