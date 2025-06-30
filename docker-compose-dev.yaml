@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  shipping-db-dev:
+    image: postgres:16-alpine
+    container_name: shipping-db-dev
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "${DB_PORT}:${DB_PORT}"
+    volumes:
+      - shipping-pg-data-dev:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  shipping-redis-dev:
+    image: redis:7-alpine
+    container_name: shipping-redis-dev
+    ports:
+      - "${REDIS_PORT}:${REDIS_PORT}"
+    command: redis-server --appendonly yes
+    volumes:
+      - shipping-redis-data-dev:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  shipping-pg-data-dev:
+  shipping-redis-data-dev:

@@ -4,7 +4,6 @@ import { FromSchema, type JSONSchema } from "json-schema-to-ts";
 export const CONFIG_SCHEMA = {
   type: "object",
   required: [
-    "PORT",
     "DB_HOST",
     "DB_PORT",
     "DB_USER",
@@ -14,7 +13,6 @@ export const CONFIG_SCHEMA = {
     "JWT_EXPIRES_IN",
   ],
   properties: {
-    PORT: { type: "number" },
     REDIS_HOST: { type: "string" },
     REDIS_PORT: { type: "number" },
     DB_HOST: { type: "string" },

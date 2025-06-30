@@ -7,7 +7,7 @@ ModuleAlias.addAliases({
   "@infrastructure": `${__dirname}/infrastructure`,
 });
 
-import "dotenv/config";
+import dotenv from "dotenv";
 
 import { FastifyAwilixOptions, fastifyAwilixPlugin } from "@fastify/awilix";
 import cors from "@fastify/cors";
@@ -62,6 +62,12 @@ import { errorHandlerPlugin } from "@src/infrastructure/web/plugins/error-handle
 // Config
 import { CONFIG_SCHEMA, getEnv } from "@src/config";
 
+if (process.env.NODE_ENV === "development") {
+  dotenv.config({ path: ".env.dev" });
+} else {
+  dotenv.config({ path: ".env" });
+}
+
 // Configuration schema for environment plugin
 export async function buildApp() {
   const fastify = Fastify({
@@ -111,12 +117,6 @@ export async function buildApp() {
         description: "API documentation shipment tracking service",
         version: "1.0.0",
       },
-      servers: [
-        {
-          url: `http://127.0.0.1:${getEnv(fastify).PORT}`,
-          description: "Development Server",
-        },
-      ],
       components: {
         securitySchemes: {
           bearerAuth: {
@@ -277,9 +277,7 @@ export async function buildApp() {
 if (require.main === module) {
   buildApp()
     .then((fastify) => {
-      const port = getEnv(fastify).PORT;
-
-      fastify.listen({ port, host: "0.0.0.0" }, (err, address) => {
+      fastify.listen({ port: 3000, host: "0.0.0.0" }, (err, address) => {
         if (err) {
           fastify.log.error(err);
           process.exit(1);

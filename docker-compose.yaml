@@ -1,9 +1,40 @@
 version: '3.8'
 
 services:
-  db:
+  nginx-backend-prod:
+      container_name: nginx-backend-prod
+      image: nginx:alpine
+      volumes:
+        - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      ports:
+        - "8080:80"
+      depends_on:
+        - shipping-backend-prod
+
+  shipping-backend-prod:
+    container_name: shipping-backend-prod
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - PORT=3000
+      - NODE_ENV=${NODE_ENV}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRES_IN=${JWT_EXPIRES_IN}
+    depends_on:
+      - shipping-db-prod
+      - shipping-redis-prod
+
+  shipping-db-prod:
     image: postgres:16-alpine
-    container_name: postgres_db
+    container_name: postgres-db-prod
     environment:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}
@@ -11,7 +42,7 @@ services:
     ports:
       - "${DB_PORT}:${DB_PORT}"
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - shipping-pg-data-prod:/var/lib/postgresql/data
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
@@ -19,14 +50,14 @@ services:
       timeout: 5s
       retries: 5
 
-  redis:
+  shipping-redis-prod:
     image: redis:7-alpine
-    container_name: redis_cache
+    container_name: redis-cache-prod
     ports:
       - "${REDIS_PORT}:${REDIS_PORT}"
     command: redis-server --appendonly yes
     volumes:
-      - redisdata:/data
+      - shipping-redis-data-prod:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -34,5 +65,5 @@ services:
       retries: 5
 
 volumes:
-  pgdata:
-  redisdata:
+  shipping-pg-data-prod:
+  shipping-redis-data-prod:
