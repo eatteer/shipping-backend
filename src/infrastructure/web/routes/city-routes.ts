@@ -23,6 +23,7 @@ export async function cityRoutes(
           500: INTERNAL_SERVER_ERROR_SCHEMA,
         },
       },
+      onRequest: [fastify.authenticate],
     },
     cityController.getAll.bind(cityController)
   );
