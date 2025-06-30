@@ -109,7 +109,7 @@ export const QUOTE_SHIPMENT_RESPONSE_SCHEMA = Type.Object({
   packageWidthCm: Type.Number({ minimum: 1, maximum: 1000 }),
   packageHeightCm: Type.Number({ minimum: 1, maximum: 1000 }),
   calculatedWeightKg: Type.Number({ minimum: 1, maximum: 1000 }),
-  quotedValue: Type.Number({ minimum: 1, maximum: 1000000 }),
+  quotedValue: Type.Number({ minimum: 1 }),
 });
 
 /**
@@ -163,7 +163,7 @@ export const GET_SHIPMENT_TRACKING_RESPONSE_SCHEMA = Type.Object({
   packageWidthCm: Type.Number({ minimum: 1, maximum: 1000 }),
   packageHeightCm: Type.Number({ minimum: 1, maximum: 1000 }),
   calculatedWeightKg: Type.Number({ minimum: 1, maximum: 1000 }),
-  quotedValue: Type.Number({ minimum: 1, maximum: 1000000 }),
+  quotedValue: Type.Number({ minimum: 1 }),
   currentStatus: Type.String(),
   trackingHistory: Type.Array(
     Type.Object({
