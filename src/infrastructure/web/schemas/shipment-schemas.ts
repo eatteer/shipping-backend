@@ -17,7 +17,7 @@ import {
 /**
  * Schema for shipment quote request body.
  * Defines the required fields for calculating shipping costs.
- * 
+ *
  * @example
  * ```json
  * {
@@ -42,7 +42,7 @@ export const QUOTE_SHIPMENT_BODY_SCHEMA = Type.Object({
 /**
  * Schema for shipment creation request body.
  * Defines the required fields for creating a new shipment.
- * 
+ *
  * @example
  * ```json
  * {
@@ -67,7 +67,7 @@ export const CREATE_SHIPMENT_BODY_SCHEMA = Type.Object({
 /**
  * Schema for shipment tracking request parameters.
  * Defines the URL parameter for retrieving tracking information.
- * 
+ *
  * @example
  * ```json
  * {
@@ -86,7 +86,7 @@ export const GET_SHIPMENT_TRACKING_PARAMS_SCHEMA = Type.Object({
 /**
  * Schema for shipment quote response.
  * Returns calculated shipping costs and package details.
- * 
+ *
  * @example
  * ```json
  * {
@@ -115,7 +115,7 @@ export const QUOTE_SHIPMENT_RESPONSE_SCHEMA = Type.Object({
 /**
  * Schema for shipment creation response.
  * Returns the ID of the newly created shipment.
- * 
+ *
  * @example
  * ```json
  * {
@@ -130,7 +130,7 @@ export const CREATE_SHIPMENT_RESPONSE_SCHEMA = Type.Object({
 /**
  * Schema for shipment tracking response.
  * Returns detailed tracking information including status history.
- * 
+ *
  * @example
  * ```json
  * {
@@ -167,7 +167,9 @@ export const GET_SHIPMENT_TRACKING_RESPONSE_SCHEMA = Type.Object({
   currentStatus: Type.String(),
   trackingHistory: Type.Array(
     Type.Object({
+      statusId: Type.String({ format: "uuid" }),
       statusName: Type.String(),
+      statusDescription: Type.String(),
       timestamp: Type.String({ format: "date-time" }),
     })
   ),
@@ -181,7 +183,7 @@ export const GET_SHIPMENT_TRACKING_RESPONSE_SCHEMA = Type.Object({
 /**
  * Schema for same origin-destination city error.
  * Used when origin and destination cities are identical.
- * 
+ *
  * @example
  * ```json
  * {
@@ -192,7 +194,9 @@ export const GET_SHIPMENT_TRACKING_RESPONSE_SCHEMA = Type.Object({
  * ```
  */
 export const SAME_ORIGIN_DESTINATION_CITY_ERROR_SCHEMA = Type.Object({
-  message: Type.String({ example: "Origin and destination cities cannot be the same" }),
+  message: Type.String({
+    example: "Origin and destination cities cannot be the same",
+  }),
   code: Type.String({ example: "SAME_ORIGIN_DESTINATION_CITY" }),
   name: Type.String({ example: "SameOriginDestinationCityError" }),
 });
@@ -200,7 +204,7 @@ export const SAME_ORIGIN_DESTINATION_CITY_ERROR_SCHEMA = Type.Object({
 /**
  * Schema for shipment not found error.
  * Used when a requested shipment doesn't exist.
- * 
+ *
  * @example
  * ```json
  * {
@@ -219,7 +223,7 @@ export const SHIPMENT_NOT_FOUND_ERROR_SCHEMA = Type.Object({
 /**
  * Schema for shipment access denied error.
  * Used when user is not authorized to view a specific shipment.
- * 
+ *
  * @example
  * ```json
  * {
@@ -247,13 +251,21 @@ export type QuoteShipmentBody = Static<typeof QUOTE_SHIPMENT_BODY_SCHEMA>;
 export type CreateShipmentBody = Static<typeof CREATE_SHIPMENT_BODY_SCHEMA>;
 
 /** Type for shipment tracking request parameters */
-export type GetShipmentTrackingParams = Static<typeof GET_SHIPMENT_TRACKING_PARAMS_SCHEMA>;
+export type GetShipmentTrackingParams = Static<
+  typeof GET_SHIPMENT_TRACKING_PARAMS_SCHEMA
+>;
 
 /** Type for shipment quote response */
-export type QuoteShipmentResponse = Static<typeof QUOTE_SHIPMENT_RESPONSE_SCHEMA>;
+export type QuoteShipmentResponse = Static<
+  typeof QUOTE_SHIPMENT_RESPONSE_SCHEMA
+>;
 
 /** Type for shipment creation response */
-export type CreateShipmentResponse = Static<typeof CREATE_SHIPMENT_RESPONSE_SCHEMA>;
+export type CreateShipmentResponse = Static<
+  typeof CREATE_SHIPMENT_RESPONSE_SCHEMA
+>;
 
 /** Type for shipment tracking response */
-export type GetShipmentTrackingResponse = Static<typeof GET_SHIPMENT_TRACKING_RESPONSE_SCHEMA>;
+export type GetShipmentTrackingResponse = Static<
+  typeof GET_SHIPMENT_TRACKING_RESPONSE_SCHEMA
+>;

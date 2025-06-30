@@ -10,7 +10,6 @@ import {
 } from "@infrastructure/web/schemas/auth-schemas";
 import {
   AUTHENTICATION_ERROR_SCHEMA,
-  VALIDATION_ERROR_SCHEMA,
   INTERNAL_SERVER_ERROR_SCHEMA,
 } from "@infrastructure/web/schemas/common-schemas";
 
@@ -33,7 +32,6 @@ export async function authRoutes(
         body: REGISTER_BODY_SCHEMA,
         response: {
           201: REGISTER_RESPONSE_SCHEMA,
-          400: VALIDATION_ERROR_SCHEMA,
           409: USER_ALREADY_EXISTS_ERROR_SCHEMA,
           500: INTERNAL_SERVER_ERROR_SCHEMA,
         },

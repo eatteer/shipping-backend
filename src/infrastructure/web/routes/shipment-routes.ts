@@ -11,7 +11,6 @@ import {
   SHIPMENT_NOT_FOUND_ERROR_SCHEMA,
 } from "@infrastructure/web/schemas/shipment-schemas";
 import {
-  VALIDATION_ERROR_SCHEMA,
   NOT_FOUND_ERROR_SCHEMA,
   INTERNAL_SERVER_ERROR_SCHEMA,
 } from "@infrastructure/web/schemas/common-schemas";

@@ -2,8 +2,9 @@ import { WebSocket } from "ws";
 
 export type ShipmentStatusUpdateMessage = {
   shipmentId: string;
-  newStatusId: string;
-  newStatusName: string;
+  statusId: string;
+  statusName: string;
+  statusDescription: string;
   timestamp: string;
 };
 
@@ -61,6 +62,8 @@ export class WebSocketService {
 
     if (clients) {
       const messageString = JSON.stringify(message);
+
+      console.log({ messageString });
 
       clients.forEach((client) => {
         if (client.readyState === WebSocket.OPEN) {

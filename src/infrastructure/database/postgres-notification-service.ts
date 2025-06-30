@@ -36,8 +36,9 @@ export class PostgresNotificationService {
               payload.shipmentId,
               {
                 shipmentId: payload.shipmentId,
-                newStatusId: payload.newStatusId,
-                newStatusName: payload.newStatusName,
+                statusId: payload.statusId,
+                statusName: payload.statusName,
+                statusDescription: payload.statusDescription,
                 timestamp: payload.timestamp,
               }
             );

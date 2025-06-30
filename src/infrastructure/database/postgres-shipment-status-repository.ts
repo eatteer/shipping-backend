@@ -16,6 +16,7 @@ export class PostgresShipmentStatusRepository
       id: row.id,
       name: row.name,
       description: row.description,
+      isFinal: row.is_final,
       createdAt: row.created_at,
       updatedAt: row.updated_at,
     });

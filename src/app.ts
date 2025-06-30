@@ -10,6 +10,7 @@ ModuleAlias.addAliases({
 import "dotenv/config";
 
 import { FastifyAwilixOptions, fastifyAwilixPlugin } from "@fastify/awilix";
+import cors from "@fastify/cors";
 import fastifyEnvPlugin from "@fastify/env";
 import fastifyJwtPlugin from "@fastify/jwt";
 import fastifyPostgresPlugin from "@fastify/postgres";
@@ -32,9 +33,10 @@ import { PostgresUserRepository } from "@infrastructure/database/postgres-user-r
 // Use cases
 import { AuthenticateUser } from "@application/use-cases/auth/authenticate-user";
 import { RegisterUser } from "@application/use-cases/auth/register-user";
-import { QuoteShipment } from "@src/application/use-cases/shipments/quote-shipment";
 import { CreateShipment } from "@application/use-cases/shipments/create-shipment";
 import { GetShipmentTrackingDetails } from "@application/use-cases/shipments/get-shipment-tracking-details";
+import { GetAllCities } from "@src/application/use-cases/city/get-all-cities";
+import { QuoteShipment } from "@src/application/use-cases/shipments/quote-shipment";
 
 // Services
 import { PostgresNotificationService } from "@infrastructure/database/postgres-notification-service";
@@ -46,11 +48,13 @@ import { BcryptPasswordService } from "@src/infrastructure/security/bcrypt-passw
 // Controllers
 import { AuthController } from "@infrastructure/web/controllers/auth-controller";
 import { ShipmentController } from "@infrastructure/web/controllers/shipment-controller";
+import { CityController } from "@src/infrastructure/web/controllers/city-controller";
 
 // Routes
 import { authRoutes } from "@infrastructure/web/routes/auth-routes";
 import { shipmentRoutes } from "@infrastructure/web/routes/shipment-routes";
 import { websocketRoutes } from "@infrastructure/web/routes/websocket-routes";
+import { cityRoutes } from "@src/infrastructure/web/routes/city-routes";
 
 // Plugings
 import { errorHandlerPlugin } from "@src/infrastructure/web/plugins/error-handler";
@@ -63,6 +67,8 @@ export async function buildApp() {
   const fastify = Fastify({
     logger: true,
   }).withTypeProvider<TypeBoxTypeProvider>();
+
+  await fastify.register(cors);
 
   // Register error handler routes
   await fastify.register(errorHandlerPlugin);
@@ -87,9 +93,11 @@ export async function buildApp() {
 
   // Register PostgreSQL plugin
   await fastify.register(fastifyPostgresPlugin, {
-    connectionString: `postgres://${getEnv(fastify).DB_USER}:${getEnv(fastify).DB_PASSWORD
-      }@${getEnv(fastify).DB_HOST}:${getEnv(fastify).DB_PORT}/${getEnv(fastify).DB_NAME
-      }`,
+    connectionString: `postgres://${getEnv(fastify).DB_USER}:${
+      getEnv(fastify).DB_PASSWORD
+    }@${getEnv(fastify).DB_HOST}:${getEnv(fastify).DB_PORT}/${
+      getEnv(fastify).DB_NAME
+    }`,
   });
 
   await fastify.register(fastifyRedis, {
@@ -179,10 +187,12 @@ export async function buildApp() {
     quoteShipment: asClass(QuoteShipment).singleton(),
     createShipment: asClass(CreateShipment).singleton(),
     getShipmentTrackingDetails: asClass(GetShipmentTrackingDetails).singleton(),
+    getAllCities: asClass(GetAllCities).singleton(),
 
     // Controllers
     authController: asClass(AuthController).singleton(),
     shipmentController: asClass(ShipmentController).singleton(),
+    cityController: asClass(CityController).singleton(),
   });
 
   // Register Awilix plugin
@@ -216,6 +226,15 @@ export async function buildApp() {
       await shipmentRoutes(instance, { shipmentController });
     },
     { prefix: "/shipments" }
+  );
+
+  await fastify.register(
+    async (instance) => {
+      const cityController =
+        instance.diContainer.resolve<CityController>("cityController");
+      await cityRoutes(instance, { cityController });
+    },
+    { prefix: "/cities" }
   );
 
   await fastify.register(async (instance) => {

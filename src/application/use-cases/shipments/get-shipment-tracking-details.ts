@@ -43,7 +43,9 @@ export type GetShipmentTrackingDetailsResponse = {
 };
 
 export type TrackingHistoryEntry = {
+  statusId: string;
   statusName: string;
+  statusDescription: string;
   timestamp: Date;
 };
 
@@ -133,14 +135,17 @@ export class GetShipmentTrackingDetails {
 
     // 4. Fetch all available shipment statuses to map IDs to names
     const allStatuses = await this.shipmentStatusRepository.findAll();
-    const statusMap = new Map<string, string>();
-
-    allStatuses.forEach((status) => statusMap.set(status.id, status.name));
 
     // 5. Map history entries to include status names
     const trackingHistory: TrackingHistoryEntry[] = historyEntries.map(
       (entry) => ({
-        statusName: statusMap.get(entry.statusId) || "Unknown Status",
+        statusId: entry.statusId,
+        statusName:
+          allStatuses.find((status) => status.id === entry.statusId)?.name ||
+          "Unknown name",
+        statusDescription:
+          allStatuses.find((status) => status.id === entry.statusId)
+            ?.description || "Unknown description",
         timestamp: entry.timestamp,
       })
     );

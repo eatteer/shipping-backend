@@ -6,10 +6,10 @@ import { UserRepository } from "@domain/repositories/user-repository";
 
 /**
  * Request data for shipment creation.
- * 
+ *
  * Contains the essential information required to create a new shipment
  * including user identification and package details.
- * 
+ *
  * @since 1.0.0
  */
 export type CreateShipmentRequest = {
@@ -31,9 +31,9 @@ export type CreateShipmentRequest = {
 
 /**
  * Response data for successful shipment creation.
- * 
+ *
  * Contains the unique identifier of the newly created shipment.
- * 
+ *
  * @since 1.0.0
  */
 export type CreateShipmentResponse = {
@@ -43,17 +43,17 @@ export type CreateShipmentResponse = {
 
 /**
  * Use case for shipment creation.
- * 
+ *
  * This use case handles the business logic for creating new shipments.
  * It validates the user exists, calculates shipping costs, creates the
  * shipment entity, and persists it to the database.
- * 
+ *
  * @since 1.0.0
  */
 export class CreateShipment {
   /**
    * Creates a new CreateShipment use case instance.
-   * 
+   *
    * @param shipmentRepository - Repository for shipment data operations
    * @param userRepository - Repository for user data operations
    * @param quoteShipment - Use case for calculating shipment quotes
@@ -62,20 +62,20 @@ export class CreateShipment {
     private readonly shipmentRepository: ShipmentRepository,
     private readonly userRepository: UserRepository,
     private readonly quoteShipment: QuoteShipment
-  ) { }
+  ) {}
 
   /**
    * Executes the shipment creation process.
-   * 
+   *
    * Performs the complete shipment creation workflow:
    * 1. Validates that the requesting user exists
    * 2. Calculates shipping costs using the quote use case
    * 3. Creates a new Shipment entity with calculated values
    * 4. Persists the shipment to the database
    * 5. Returns the shipment ID for tracking
-   * 
+   *
    * @param request - Shipment creation data containing user and package details
-   * 
+   *
    * @example
    * ```typescript
    * const createShipment = new CreateShipment(
@@ -83,7 +83,7 @@ export class CreateShipment {
    *   userRepository,
    *   quoteShipment
    * );
-   * 
+   *
    * const response = await createShipment.execute({
    *   userId: "user-123",
    *   originCityId: "city-123",
@@ -93,21 +93,23 @@ export class CreateShipment {
    *   packageWidthCm: 20,
    *   packageHeightCm: 15
    * });
-   * 
+   *
    * console.log(response.shipmentId); // New shipment ID
    * ```
-   * 
+   *
    * @throws {NotFoundError} When the requesting user is not found
    * @throws {SameOriginDestinationCityError} When origin and destination cities are identical
    * @throws {NotFoundError} When origin or destination city is not found
    * @throws {NotFoundError} When shipping rate is not found for the route
    * @throws {Error} When database operations fail
-   * 
+   *
    * @returns Promise that resolves to the creation response containing the shipment ID
-   * 
+   *
    * @since 1.0.0
    */
-  public async execute(request: CreateShipmentRequest): Promise<CreateShipmentResponse> {
+  public async execute(
+    request: CreateShipmentRequest
+  ): Promise<CreateShipmentResponse> {
     const {
       userId,
       originCityId,
