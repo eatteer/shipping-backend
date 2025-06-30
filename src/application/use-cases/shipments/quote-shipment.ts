@@ -6,10 +6,10 @@ import { RateRepository } from "@domain/repositories/rate-repository";
 
 /**
  * Request data for shipment quoting.
- * 
+ *
  * Contains the essential information required to calculate shipping costs
  * including origin, destination, and package dimensions.
- * 
+ *
  * @since 1.0.0
  */
 export type QuoteShipmentRequest = {
@@ -29,10 +29,10 @@ export type QuoteShipmentRequest = {
 
 /**
  * Response data for shipment quote calculation.
- * 
+ *
  * Contains the calculated shipping costs and package details including
  * volumetric weight calculations and final quoted value.
- * 
+ *
  * @since 1.0.0
  */
 export type QuoteShipmentResponse = {
@@ -40,6 +40,10 @@ export type QuoteShipmentResponse = {
   originCityId: string;
   /** Unique identifier of the destination city */
   destinationCityId: string;
+  /** Name of the origin city */
+  originCityName: string;
+  /** Name of the destination city */
+  destinationCityName: string;
   /** Weight of the package in kilograms */
   packageWeightKg: number;
   /** Length of the package in centimeters */
@@ -56,11 +60,11 @@ export type QuoteShipmentResponse = {
 
 /**
  * Use case for shipment quote calculation.
- * 
+ *
  * This use case handles the business logic for calculating shipping costs.
  * It validates cities, calculates volumetric weight, applies shipping rates,
  * and provides caching for performance optimization.
- * 
+ *
  * @since 1.0.0
  */
 export class QuoteShipment {
@@ -72,7 +76,7 @@ export class QuoteShipment {
 
   /**
    * Creates a new QuoteShipment use case instance.
-   * 
+   *
    * @param cityRepository - Repository for city data operations
    * @param rateRepository - Repository for shipping rate data operations
    * @param cacheService - Service for caching quote results
@@ -81,11 +85,11 @@ export class QuoteShipment {
     private readonly cityRepository: CityRepository,
     private readonly rateRepository: RateRepository,
     private readonly cacheService: CacheService
-  ) { }
+  ) {}
 
   /**
    * Executes the shipment quote calculation process.
-   * 
+   *
    * Performs the complete quote calculation workflow:
    * 1. Validates that origin and destination cities are different
    * 2. Checks cache for existing quote results
@@ -93,9 +97,9 @@ export class QuoteShipment {
    * 4. Calculates volumetric and actual weight
    * 5. Applies shipping rates based on zones
    * 6. Caches the result for future requests
-   * 
+   *
    * @param request - Shipment quote data containing cities and package dimensions
-   * 
+   *
    * @example
    * ```typescript
    * const quoteShipment = new QuoteShipment(
@@ -103,7 +107,7 @@ export class QuoteShipment {
    *   rateRepository,
    *   cacheService
    * );
-   * 
+   *
    * const quote = await quoteShipment.execute({
    *   originCityId: "city-123",
    *   destinationCityId: "city-456",
@@ -112,17 +116,17 @@ export class QuoteShipment {
    *   packageWidthCm: 20,
    *   packageHeightCm: 15
    * });
-   * 
+   *
    * console.log(quote.quotedValue); // Final shipping cost
    * ```
-   * 
+   *
    * @throws {SameOriginDestinationCityError} When origin and destination cities are identical
    * @throws {NotFoundError} When origin or destination city is not found
    * @throws {NotFoundError} When shipping rate is not found for the route
    * @throws {Error} When database operations or cache operations fail
-   * 
+   *
    * @returns Promise that resolves to the calculated quote response
-   * 
+   *
    * @since 1.0.0
    */
   public async execute(
@@ -212,6 +216,8 @@ export class QuoteShipment {
       result = {
         originCityId: originCity.id,
         destinationCityId: destinationCity.id,
+        originCityName: originCity.name,
+        destinationCityName: destinationCity.name,
         packageWeightKg,
         packageLengthCm,
         packageWidthCm,

@@ -92,6 +92,8 @@ export const GET_SHIPMENT_TRACKING_PARAMS_SCHEMA = Type.Object({
  * {
  *   "originCityId": "550e8400-e29b-41d4-a716-446655440000",
  *   "destinationCityId": "550e8400-e29b-41d4-a716-446655440001",
+ *   "originCityName": "Pereira",
+ *   "destinationCityName": "Bogotá",
  *   "packageWeightKg": 5.5,
  *   "packageLengthCm": 30,
  *   "packageWidthCm": 20,
@@ -104,6 +106,8 @@ export const GET_SHIPMENT_TRACKING_PARAMS_SCHEMA = Type.Object({
 export const QUOTE_SHIPMENT_RESPONSE_SCHEMA = Type.Object({
   originCityId: Type.String({ format: "uuid" }),
   destinationCityId: Type.String({ format: "uuid" }),
+  originCityName: Type.String(),
+  destinationCityName: Type.String(),
   packageWeightKg: Type.Number({ minimum: 1, maximum: 1000 }),
   packageLengthCm: Type.Number({ minimum: 1, maximum: 1000 }),
   packageWidthCm: Type.Number({ minimum: 1, maximum: 1000 }),
