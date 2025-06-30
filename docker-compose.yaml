@@ -35,8 +35,10 @@ services:
       - JWT_SECRET=${JWT_SECRET}
       - JWT_EXPIRES_IN=${JWT_EXPIRES_IN}
     depends_on:
-      - shipping-db-prod
-      - shipping-redis-prod
+      shipping-db-prod:
+        condition: service_healthy
+      shipping-redis-prod:
+        condition: service_healthy
 
   shipping-db-prod:
     image: postgres:16-alpine
@@ -55,6 +57,7 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+      start_period: 10s
 
   shipping-redis-prod:
     image: redis:7-alpine
@@ -69,6 +72,7 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+      start_period: 5s
 
 volumes:
   shipping-pg-data-prod:

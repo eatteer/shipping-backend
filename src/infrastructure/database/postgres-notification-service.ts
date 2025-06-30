@@ -21,15 +21,15 @@ export class PostgresNotificationService {
       this.client = await this.pg.connect();
 
       this.client.on("notification", (msg) => {
+        console.log(
+          `[PostgresNotificationService] Received notification from channel ${msg.channel}:`,
+          msg.payload
+        );
+
         if (msg.channel === this.channelName) {
           try {
-            const payload: ShipmentStatusUpdateMessage & {
-              newStatusId: string;
-            } = JSON.parse(msg.payload || "{}");
-
-            console.log(
-              `[PostgresNotificationService] Notification received from channel ${msg.channel}:`,
-              payload
+            const payload: ShipmentStatusUpdateMessage = JSON.parse(
+              msg.payload || "{}"
             );
 
             this.webSocketService.notifyShipmentStatusUpdate(
