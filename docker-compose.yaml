@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  nginx-backend-prod:
+  shipping-nginx-backend-prod:
       container_name: nginx-backend-prod
       image: nginx:alpine
       volumes:
@@ -24,14 +24,13 @@ services:
       dockerfile: Dockerfile
     environment:
       - PORT=3000
-      - NODE_ENV=${NODE_ENV}
       - DB_HOST=${DB_HOST}
-      - DB_PORT=${DB_PORT}
+      - DB_PORT=5432
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_NAME=${DB_NAME}
       - REDIS_HOST=${REDIS_HOST}
-      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_PORT=6379
       - JWT_SECRET=${JWT_SECRET}
       - JWT_EXPIRES_IN=${JWT_EXPIRES_IN}
     depends_on:
@@ -48,7 +47,7 @@ services:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
-      - "${DB_PORT}:${DB_PORT}"
+      - "5432:5432"
     volumes:
       - shipping-pg-data-prod:/var/lib/postgresql/data
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
@@ -63,7 +62,7 @@ services:
     image: redis:7-alpine
     container_name: redis-cache-prod
     ports:
-      - "${REDIS_PORT}:${REDIS_PORT}"
+      - "6379:6379"
     command: redis-server --appendonly yes
     volumes:
       - shipping-redis-data-prod:/data
