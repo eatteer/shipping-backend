@@ -110,7 +110,7 @@ Finally run the following commands to run the backend locally:
 
 ```bash
 pnpm install -- Ignore this if you already ran it
-pnpm run dev
+pnpm dev
 ```
 
 You can check:
