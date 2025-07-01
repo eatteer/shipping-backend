@@ -1,4 +1,3 @@
-// tsconfig.json
 {
   "compilerOptions": {
     "target": "es2022",
@@ -19,7 +18,8 @@
       "@domain/*": ["./src/domain/*"],
       "@application/*": ["./src/application/*"],
       "@infrastructure/*": ["./src/infrastructure/*"]
-    }
+    },
+    "types": ["jest", "node"]
   },
   "include": ["src/**/*.ts", "tests/**/*.ts"],
   "exclude": ["node_modules"]

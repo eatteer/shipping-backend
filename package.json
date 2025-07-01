@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node dist/app.js",
     "build": "tsc",
+    "test": "jest",
     "dev": "cross-env NODE_ENV=development tsc-watch --onSuccess \"node dist/app.js\"",
     "docker:dev": "docker-compose -f docker-compose-dev.yaml --env-file .env.dev up -d --build",
     "docker:dev:down": "docker-compose -f docker-compose-dev.yaml down",
@@ -42,10 +43,14 @@
     "ws": "^8.18.3"
   },
   "devDependencies": {
+    "@types/jest": "^30.0.0",
     "@types/module-alias": "^2.0.4",
     "@types/node": "^24.0.7",
     "@types/pg": "^8.15.4",
     "@types/ws": "^8.18.1",
+    "jest": "^30.0.3",
+    "ts-jest": "^29.4.0",
+    "ts-node": "^10.9.2",
     "tsc-watch": "^7.1.1",
     "typescript": "^5.8.3"
   }

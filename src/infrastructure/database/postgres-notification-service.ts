@@ -13,7 +13,7 @@ export class PostgresNotificationService {
   public constructor(
     private readonly pg: PostgresDb,
     private readonly webSocketService: WebSocketService
-  ) {}
+  ) { }
 
   public async startListening(): Promise<void> {
     try {
@@ -54,7 +54,7 @@ export class PostgresNotificationService {
       await this.client.query(`LISTEN ${this.channelName}`);
 
       console.log(
-        `[PostgresNotificationService] Listening on the channel ‘${this.channelName}’ for dispatch updates`
+        `[PostgresNotificationService] Listening on the channel '${this.channelName}' for dispatch updates`
       );
     } catch (error) {
       console.error(
@@ -77,11 +77,11 @@ export class PostgresNotificationService {
         this.client = null;
 
         console.log(
-          `[PostgresNotificationService] Dejó de escuchar el canal '${this.channelName}'`
+          `[PostgresNotificationService] Stopped listening to channel '${this.channelName}'`
         );
       } catch (error) {
         console.error(
-          "[PostgresNotificationService] Error al detener el listener de PostgreSQL:",
+          "[PostgresNotificationService] Error stopping PostgreSQL listener:",
           error
         );
       }
